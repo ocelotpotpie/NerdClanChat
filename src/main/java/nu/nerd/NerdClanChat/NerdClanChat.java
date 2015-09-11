@@ -49,6 +49,7 @@ public final class NerdClanChat extends JavaPlugin {
         this.getCommand("c").setExecutor(chatCommands);
         this.getCommand("cq").setExecutor(chatCommands);
         this.getCommand("ca").setExecutor(chatCommands);
+        this.getCommand("cme").setExecutor(chatCommands);
 
     }
 

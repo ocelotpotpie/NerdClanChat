@@ -36,7 +36,7 @@ public class ChatCommands implements CommandExecutor {
             else if (args[0].charAt(0) == '#' && args.length == 1) {
                 this.setDefaultChannel(sender, args[0].substring(1));
             } else {
-                this.c(sender, args);
+                this.chat(sender, args, MessageType.NORMAL);
             }
             return true;
         }
@@ -54,7 +54,19 @@ public class ChatCommands implements CommandExecutor {
             if (args.length < 1) {
                 sender.sendMessage(ChatColor.RED + "Usage: /ca [#<channel>] <message>");
             } else {
-                this.ca(sender, args);
+                this.chat(sender, args, MessageType.ALERT);
+            }
+            return true;
+        }
+
+        if (cmd.getName().equalsIgnoreCase("cme")) {
+            if (args.length < 1) {
+                sender.sendMessage(ChatColor.RED + "Usage: /cme [#<channel>] <message>");
+            }
+            else if (args[0].charAt(0) == '#' && args.length == 1) {
+                this.setDefaultChannel(sender, args[0].substring(1));
+            } else {
+                this.chat(sender, args, MessageType.ME);
             }
             return true;
         }
@@ -64,7 +76,7 @@ public class ChatCommands implements CommandExecutor {
     }
 
 
-    private void c(CommandSender sender, String[] args) {
+    private void chat(CommandSender sender, String[] args, MessageType type) {
         String channel;
         String message;
         if (args[0].charAt(0) == '#') {
@@ -78,7 +90,7 @@ public class ChatCommands implements CommandExecutor {
                 return;
             }
         }
-        this.sendMessage(sender, channel, message, MessageType.NORMAL, true);
+        this.sendMessage(sender, channel, message, type, true);
     }
 
 
@@ -86,24 +98,6 @@ public class ChatCommands implements CommandExecutor {
         String channel = args[0].substring(1);
         String message = this.joinArray(" ", Arrays.copyOfRange(args, 1, args.length));
         this.sendMessage(sender, channel, message, MessageType.NORMAL, false);
-    }
-
-
-    private void ca(CommandSender sender, String[] args) {
-        String channel;
-        String message;
-        if (args[0].charAt(0) == '#') {
-            channel = args[0].substring(1);
-            message = this.joinArray(" ", Arrays.copyOfRange(args, 1, args.length));
-        } else {
-            channel = getDefaultChannel(sender);
-            message = this.joinArray(" ", args);
-            if (channel == null) {
-                sender.sendMessage(String.format("%sYou don't have a default channel set (or aren't in any channels). Run %s/clanchat%s for help", ChatColor.RED, ChatColor.LIGHT_PURPLE, ChatColor.RED));
-                return;
-            }
-        }
-        this.sendMessage(sender, channel, message, MessageType.ALERT, false);
     }
 
 
@@ -135,12 +129,12 @@ public class ChatCommands implements CommandExecutor {
 
         // Format message
         if (type == MessageType.ME) {
-            tag = String.format("%s[%s] * ", this.color(channel.getColor()), channel.getName());
-            msg = tag + this.color(channel.getTextColor()) + message;
+            tag = String.format("%s[%s]", this.color(channel.getColor()), channel.getName());
+            msg = String.format("%s %s* %s %s", tag, this.color(channel.getTextColor()), ChatColor.stripColor(name), message);
         }
         else if (type == MessageType.ALERT) {
             tag = String.format("%s[%s] %s<%s> ", this.color(channel.getColor()), channel.getName(), this.color(channel.getAlertColor()), name);
-            msg = tag + ChatColor.UNDERLINE + message;
+            msg = tag + this.color(channel.getAlertColor()) + "" + ChatColor.UNDERLINE + message;
         }
         else {
             tag = String.format("%s[%s] %s<%s%s> ", this.color(channel.getColor()), channel.getName(), ChatColor.GRAY, name, ChatColor.GRAY);
