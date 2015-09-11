@@ -124,6 +124,7 @@ public class ClanChatCommand implements CommandExecutor {
 
 
     private void printMoreHelpText(CommandSender sender) {
+        sender.sendMessage(ChatColor.BLUE + "/cs [#<channel>] <message>" + ChatColor.WHITE + "Sends a \"/s\" type sarcasm message to your current, or specified, channel.");
         sender.sendMessage(ChatColor.BLUE + "/clanchat delete <channel>" + ChatColor.WHITE + " - Deletes a channel. Owner only.");
         sender.sendMessage(ChatColor.BLUE + "/clanchat color <channel> <color>" + ChatColor.WHITE + " - Sets the channel color. Set by channel owner/managers.");
         sender.sendMessage(ChatColor.BLUE + "/clanchat textcolor <channel> <color>" + ChatColor.WHITE + " - Sets the channel text color. Set by channel owner/managers.");

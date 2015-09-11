@@ -73,7 +73,7 @@ public class ChatCommands implements CommandExecutor {
 
         if (cmd.getName().equalsIgnoreCase("cs")) {
             if (args.length < 1) {
-                sender.sendMessage(ChatColor.RED + "Usage: /cme [#<channel>] <message>");
+                sender.sendMessage(ChatColor.RED + "Usage: /cs [#<channel>] <message>");
             }
             else if (args[0].charAt(0) == '#' && args.length == 1) {
                 this.setDefaultChannel(sender, args[0].substring(1));
