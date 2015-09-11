@@ -31,6 +31,11 @@ commands:
     description: Sends a "/me" type message to your current, or specified, channel.
     permission: nerdclanchat.player
     permission-message: You don't have permission to do that.
+  cs:
+    usage: /cs [#<channel>] <message>
+    description: Sends a "/s" type sarcasm message to your current, or specified, channel.
+    permission: nerdclanchat.player
+    permission-message: You don't have permission to do that.
 
 
 permissions:

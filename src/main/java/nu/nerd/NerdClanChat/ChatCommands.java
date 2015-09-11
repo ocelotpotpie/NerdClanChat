@@ -18,7 +18,7 @@ public class ChatCommands implements CommandExecutor {
 
     private final NerdClanChat plugin;
     private enum MessageType {
-        NORMAL, ME, ALERT
+        NORMAL, ME, ALERT, SARCASM
     }
 
 
@@ -67,6 +67,18 @@ public class ChatCommands implements CommandExecutor {
                 this.setDefaultChannel(sender, args[0].substring(1));
             } else {
                 this.chat(sender, args, MessageType.ME);
+            }
+            return true;
+        }
+
+        if (cmd.getName().equalsIgnoreCase("cs")) {
+            if (args.length < 1) {
+                sender.sendMessage(ChatColor.RED + "Usage: /cme [#<channel>] <message>");
+            }
+            else if (args[0].charAt(0) == '#' && args.length == 1) {
+                this.setDefaultChannel(sender, args[0].substring(1));
+            } else {
+                this.chat(sender, args, MessageType.SARCASM);
             }
             return true;
         }
@@ -135,6 +147,10 @@ public class ChatCommands implements CommandExecutor {
         else if (type == MessageType.ALERT) {
             tag = String.format("%s[%s] %s<%s> ", this.color(channel.getColor()), channel.getName(), this.color(channel.getAlertColor()), name);
             msg = tag + this.color(channel.getAlertColor()) + "" + ChatColor.UNDERLINE + message;
+        }
+        else if (type == MessageType.SARCASM) {
+            tag = String.format("%s[%s] %s<%s%s> ", this.color(channel.getColor()), channel.getName(), ChatColor.GRAY, name, ChatColor.GRAY);
+            msg = tag + this.color(channel.getTextColor()) + ChatColor.ITALIC + message;
         }
         else {
             tag = String.format("%s[%s] %s<%s%s> ", this.color(channel.getColor()), channel.getName(), ChatColor.GRAY, name, ChatColor.GRAY);
