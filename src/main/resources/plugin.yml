@@ -1,0 +1,36 @@
+name: NerdClanChat
+main: nu.nerd.NerdClanChat.NerdClanChat
+description: A chat channel plugin
+version: ${project.version}
+database: true
+
+
+commands:
+  clanchat:
+    usage: /clanchat [subcommand]
+    description: ClanChat management
+    permission: nerdclanchat.player
+    permission-message: You don't have permission to do that.
+  c:
+    usage: /c [#channel] message
+    description: Send a message to a channel
+    permission: nerdclanchat.player
+    permission-message: You don't have permission to do that.
+  cq:
+    usage: /cq #<channel> <message>
+    description: Sends a quick message to the specified channel. This does not change your default channel.
+    permission: nerdclanchat.player
+    permission-message: You don't have permission to do that.
+  ca:
+    usage: /ca [#<channel>] <message>
+    description: Sends an alert message to the channel. You must be an owner/manager of the channel. If a channel name is not included it will alert your current channel.
+    permission: nerdclanchat.player
+    permission-message: You don't have permission to do that.
+
+
+permissions:
+  nerdclanchat.admin:
+    description: Admin functions
+  nerdclanchat.player:
+    description: General functions
+    default: true
