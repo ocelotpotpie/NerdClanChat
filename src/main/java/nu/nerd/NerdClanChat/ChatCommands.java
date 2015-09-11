@@ -17,6 +17,9 @@ public class ChatCommands implements CommandExecutor {
 
 
     private final NerdClanChat plugin;
+    private enum MessageType {
+        NORMAL, ME, ALERT
+    }
 
 
     public ChatCommands(NerdClanChat plugin) {
@@ -75,14 +78,14 @@ public class ChatCommands implements CommandExecutor {
                 return;
             }
         }
-        this.sendMessage(sender, channel, message, true);
+        this.sendMessage(sender, channel, message, MessageType.NORMAL, true);
     }
 
 
     private void cq(CommandSender sender, String[] args) {
         String channel = args[0].substring(1);
         String message = this.joinArray(" ", Arrays.copyOfRange(args, 1, args.length));
-        this.sendMessage(sender, channel, message, false);
+        this.sendMessage(sender, channel, message, MessageType.NORMAL, false);
     }
 
 
@@ -100,15 +103,19 @@ public class ChatCommands implements CommandExecutor {
                 return;
             }
         }
-        this.sendAlert(sender, channel, message);
+        this.sendMessage(sender, channel, message, MessageType.ALERT, false);
     }
 
 
-    private void sendMessage(CommandSender sender, String channelName, String message, boolean changeDefault) {
+    private void sendMessage(CommandSender sender, String channelName, String message, MessageType type, boolean changeDefault) {
 
         Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
         HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName.toLowerCase());
+        String tag;
+        String msg;
+        String name;
 
+        // Check permission
         if (sender instanceof Player) {
             Player player = (Player) sender;
             if ( !(members.containsKey(player.getUniqueId().toString())) ) {
@@ -116,49 +123,41 @@ public class ChatCommands implements CommandExecutor {
                 return;
             }
         }
+        if (type == MessageType.ALERT && !this.assertManager(sender, channelName)) return;
 
-        String pname;
+        // Get sender name, using ~console for console
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            pname = ChatColor.WHITE + player.getName();
+            name = ChatColor.WHITE + player.getName();
         } else {
-            pname = ChatColor.RED + "~console";
+            name = ChatColor.RED + "~console";
         }
-        String tag = String.format("%s[%s] %s<%s%s> ", this.color(channel.getColor()), channel.getName(), ChatColor.GRAY, pname, ChatColor.GRAY);
-        String msg = tag + this.color(channel.getTextColor()) + message;
-        plugin.getLogger().info(msg);
+
+        // Format message
+        if (type == MessageType.ME) {
+            tag = String.format("%s[%s] * ", this.color(channel.getColor()), channel.getName());
+            msg = tag + this.color(channel.getTextColor()) + message;
+        }
+        else if (type == MessageType.ALERT) {
+            tag = String.format("%s[%s] %s<%s> ", this.color(channel.getColor()), channel.getName(), this.color(channel.getAlertColor()), name);
+            msg = tag + ChatColor.UNDERLINE + message;
+        }
+        else {
+            tag = String.format("%s[%s] %s<%s%s> ", this.color(channel.getColor()), channel.getName(), ChatColor.GRAY, name, ChatColor.GRAY);
+            msg = tag + this.color(channel.getTextColor()) + message;
+        }
+
+        // Send message
+        plugin.getLogger().info(ChatColor.stripColor(msg));
         this.sendRawMessage(channelName, msg);
 
+        // Change default, if applicable, and update last recieved channel
         if (changeDefault) {
             this.setDefaultChannel(sender, channelName);
         }
-
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             if (members.containsKey(player.getUniqueId().toString())) {
                 this.updateLastChannelReceived(player, channelName);
-            }
-        }
-
-    }
-
-
-    private void sendAlert(CommandSender sender, String channelName, String message) {
-
-        if (!this.assertManager(sender, channelName)) return;
-
-        Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
-        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName.toLowerCase());
-        Player player = (Player) sender;
-
-        String tag = String.format("%s[%s] %s<%s> ", this.color(channel.getColor()), channel.getName(), this.color(channel.getAlertColor()), player.getName());
-        String msg = tag + ChatColor.UNDERLINE + message;
-        plugin.getLogger().info(msg);
-        this.sendRawMessage(channelName, msg);
-        this.setDefaultChannel(sender, channelName);
-
-        for (Player p : plugin.getServer().getOnlinePlayers()) {
-            if (members.containsKey(p.getUniqueId().toString())) {
-                this.updateLastChannelReceived(p, channelName);
             }
         }
 
