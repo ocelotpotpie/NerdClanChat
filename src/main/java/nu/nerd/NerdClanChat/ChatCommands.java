@@ -83,6 +83,15 @@ public class ChatCommands implements CommandExecutor {
             return true;
         }
 
+        if (cmd.getName().equalsIgnoreCase("cr")) {
+            if (args.length < 1) {
+                sender.sendMessage(ChatColor.RED + "Usage: /cr <message>");
+            } else {
+                this.cr(sender, args);
+            }
+            return true;
+        }
+
         return false;
 
     }
@@ -110,6 +119,22 @@ public class ChatCommands implements CommandExecutor {
         String channel = args[0].substring(1);
         String message = this.joinArray(" ", Arrays.copyOfRange(args, 1, args.length));
         this.sendMessage(sender, channel, message, MessageType.NORMAL, false);
+    }
+
+
+    private void cr(CommandSender sender, String[] args) {
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            String message = this.joinArray(" ", args);
+            String channelName = this.getLastChannelReceived(player);
+            if (channelName != null) {
+                this.sendMessage(sender, channelName, message, MessageType.NORMAL, true);
+            } else {
+                sender.sendMessage(ChatColor.RED + "You have not yet received a message to reply to.");
+            }
+        } else {
+            sender.sendMessage(ChatColor.RED + "You can't do that from console.");
+        }
     }
 
 

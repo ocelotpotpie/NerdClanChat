@@ -36,6 +36,11 @@ commands:
     description: Sends a "/s" type sarcasm message to your current, or specified, channel.
     permission: nerdclanchat.player
     permission-message: You don't have permission to do that.
+  cr:
+    usage: /cr <message>
+    description: Sends a message to the last channel that you received a message from, regardless of what your default channel is.
+    permission: nerdclanchat.player
+    permission-message: You don't have permission to do that.
 
 
 permissions:
