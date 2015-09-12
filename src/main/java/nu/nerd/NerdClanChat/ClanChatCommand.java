@@ -82,7 +82,7 @@ public class ClanChatCommand implements CommandExecutor {
 
             //Create the channel
             Channel ch = new Channel(name, owner.getUniqueId().toString());
-            ChannelMember mem = new ChannelMember(name, owner.getUniqueId().toString(), true);
+            ChannelMember mem = new ChannelMember(name, owner.getUniqueId().toString(), owner.getName(), true);
             try {
                 plugin.channelsTable.save(ch);
                 plugin.channelMembersTable.save(mem);

@@ -12,7 +12,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.persistence.PersistenceException;
 import java.util.ArrayList;
-import java.util.Map;
 
 
 public final class NerdClanChat extends JavaPlugin {
@@ -43,6 +42,9 @@ public final class NerdClanChat extends JavaPlugin {
         this.channelCache = new ChannelCache(this);
         this.playerMetaCache = new PlayerMetaCache(this);
 
+        // Event handlers
+        getServer().getPluginManager().registerEvents(new PluginListener(this), this);
+
         // Commands
         ChatCommands chatCommands = new ChatCommands(this);
         this.getCommand("clanchat").setExecutor(new ClanChatCommand(this));
@@ -52,7 +54,16 @@ public final class NerdClanChat extends JavaPlugin {
         this.getCommand("cme").setExecutor(chatCommands);
         this.getCommand("cs").setExecutor(chatCommands);
         this.getCommand("cr").setExecutor(chatCommands);
+        this.getCommand("cm").setExecutor(chatCommands);
 
+    }
+
+
+    @Override
+    public void onDisable() {
+        getLogger().info("Writing player meta to persistence database...");
+        this.playerMetaCache.persistCache();
+        getLogger().info("Done.");
     }
 
 

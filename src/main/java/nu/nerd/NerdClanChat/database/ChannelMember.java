@@ -18,6 +18,8 @@ public class ChannelMember {
     @NotNull
     private String UUID;
 
+    private String name;
+
     private boolean manager;
 
     private boolean subscribed;
@@ -26,9 +28,10 @@ public class ChannelMember {
     public ChannelMember() {
     }
 
-    public ChannelMember(String channel, String UUID, boolean isManager) {
+    public ChannelMember(String channel, String UUID, String name, boolean isManager) {
         this.setChannel(channel);
         this.setUUID(UUID);
+        this.setName(name);
         this.setSubscribed(true);
         this.setManager(isManager);
     }
@@ -56,6 +59,14 @@ public class ChannelMember {
 
     public void setUUID(String UUID) {
         this.UUID = UUID;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public boolean isManager() {

@@ -41,6 +41,11 @@ commands:
     description: Sends a message to the last channel that you received a message from, regardless of what your default channel is.
     permission: nerdclanchat.player
     permission-message: You don't have permission to do that.
+  cm:
+    usage: /cm [#<channel>]
+    description: Lists all members in your default channel. If a channel is given, lists members in that channel.
+    permission: nerdclanchat.player
+    permission-message: You don't have permission to do that.
 
 
 permissions:

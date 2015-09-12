@@ -19,6 +19,8 @@ public class PlayerMeta {
     @Column(unique=true)
     private String UUID;
 
+    private String name;
+
     private String lastReceived;
 
     private String defaultChannel;
@@ -46,6 +48,14 @@ public class PlayerMeta {
 
     public void setUUID(String UUID) {
         this.UUID = UUID;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getLastReceived() {

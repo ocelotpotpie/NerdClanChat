@@ -2,6 +2,7 @@ package nu.nerd.NerdClanChat.database;
 
 
 import com.avaje.ebean.Query;
+import com.avaje.ebean.SqlUpdate;
 import nu.nerd.NerdClanChat.NerdClanChat;
 
 import java.util.HashMap;
@@ -26,6 +27,15 @@ public class ChannelMembersTable {
             }
         }
         return members;
+    }
+
+
+    public void updateChannelMemberNames(String UUID, String newName) {
+        String query = "update clanchat_members set name=:name where uuid=:uuid";
+        SqlUpdate update = plugin.getDatabase().createSqlUpdate(query)
+                .setParameter("name", newName)
+                .setParameter("uuid", UUID);
+        update.execute();
     }
 
 

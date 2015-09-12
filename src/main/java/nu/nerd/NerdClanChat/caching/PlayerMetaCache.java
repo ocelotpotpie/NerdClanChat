@@ -5,6 +5,7 @@ import nu.nerd.NerdClanChat.NerdClanChat;
 import nu.nerd.NerdClanChat.database.PlayerMeta;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class PlayerMetaCache {
 
@@ -65,6 +66,25 @@ public class PlayerMetaCache {
         }
         this.playerMeta.put(UUID, meta);
         this.setMetaPersisted(UUID, false);
+    }
+
+
+    public void persistCache() {
+        plugin.getDatabase().beginTransaction();
+        try {
+            for (Map.Entry<String, Boolean> p : this.persisted.entrySet()) {
+                if (!p.getValue()) {
+                    PlayerMeta meta = this.getPlayerMeta(p.getKey());
+                    plugin.getDatabase().save(meta);
+                    this.setMetaPersisted(p.getKey(), true);
+                }
+            }
+            plugin.getDatabase().commitTransaction();
+        } catch (Exception ex) {
+            plugin.getLogger().warning(ex.toString());
+        } finally {
+            plugin.getDatabase().endTransaction();
+        }
     }
 
 

@@ -9,8 +9,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class ChatCommands implements CommandExecutor {
@@ -92,6 +94,11 @@ public class ChatCommands implements CommandExecutor {
             return true;
         }
 
+        if (cmd.getName().equalsIgnoreCase("cm")) {
+            this.cm(sender, args);
+            return true;
+        }
+
         return false;
 
     }
@@ -135,6 +142,26 @@ public class ChatCommands implements CommandExecutor {
         } else {
             sender.sendMessage(ChatColor.RED + "You can't do that from console.");
         }
+    }
+
+
+    private void cm(CommandSender sender, String[] args) {
+        String channel;
+        if (args.length < 1) {
+            channel = getDefaultChannel(sender);
+            if (channel == null) {
+                sender.sendMessage(ChatColor.RED + "No previous channel");
+                return;
+            }
+        }
+        else if (args.length == 1 && args[0].charAt(0) == '#') {
+            channel = args[0].substring(1);
+        }
+        else {
+            sender.sendMessage(ChatColor.RED + "Usage: /cm [#<channel>]");
+            return;
+        }
+        this.listChannelMembers(sender, channel);
     }
 
 
@@ -209,6 +236,48 @@ public class ChatCommands implements CommandExecutor {
     }
 
 
+    private void listChannelMembers(CommandSender sender, String channelName) {
+
+        Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName.toLowerCase());
+
+        if (channel == null) {
+            sender.sendMessage(ChatColor.RED + "That channel does not exist");
+            return;
+        }
+
+        // Deny access if a non-member tries to list a secret channel
+        if (sender instanceof Player) {
+            if (channel.isSecret()) {
+                Player player = (Player) sender;
+                if (!members.containsKey(player.getUniqueId().toString())) {
+                    sender.sendMessage(ChatColor.RED + "This channel is secret. You must be a member of the channel to see who is in the channel");
+                    return;
+                }
+            }
+        }
+
+        // Collect players into online and offline lists
+        List<String> online = new ArrayList<String>();
+        List<String> offline = new ArrayList<String>();
+        for (Player player : plugin.getServer().getOnlinePlayers()) {
+            if (members.containsKey(player.getUniqueId().toString())) {
+                online.add(player.getName());
+            }
+        }
+        for (ChannelMember member : members.values()) {
+            if (!online.contains(member.getName())) {
+                offline.add(member.getName());
+            }
+        }
+
+        // Output
+        sender.sendMessage(ChatColor.GOLD + "Online: " + this.formatList(online, ChatColor.WHITE, ChatColor.GRAY));
+        sender.sendMessage(ChatColor.GOLD + "Offline: " + this.formatList(offline, ChatColor.WHITE, ChatColor.GRAY));
+
+    }
+
+
     private void setDefaultChannel(CommandSender sender, String channel) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
@@ -255,6 +324,25 @@ public class ChatCommands implements CommandExecutor {
             sb.append(separator);
         }
         return sb.toString().trim();
+    }
+
+
+    private String formatList(List<String> list, ChatColor color1, ChatColor color2) {
+        StringBuilder sb = new StringBuilder();
+        for (String item : list) {
+            if (list.indexOf(list) % 2 == 0) {
+                sb.append(color1);
+            }
+            else {
+                sb.append(color2);
+            }
+            sb.append(item);
+            if (list.indexOf(item) != (list.size() - 1)) {
+                sb.append(color1);
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
     }
 
 
