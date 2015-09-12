@@ -46,6 +46,11 @@ commands:
     description: Lists all members in your default channel. If a channel is given, lists members in that channel.
     permission: nerdclanchat.player
     permission-message: You don't have permission to do that.
+  cb:
+    usage: /cb [#<channel>]
+    description: List bulletins for all channels you are a member of, or specify a channel to receive its bulletins.
+    permission: nerdclanchat.player
+    permission-message: You don't have permission to do that.
 
 
 permissions:

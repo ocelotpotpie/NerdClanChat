@@ -64,4 +64,18 @@ public class ChannelCache {
     }
 
 
+    public List<Bulletin> getBulletins(String channel) {
+        channel = channel.toLowerCase();
+        if (this.bulletins.containsKey(channel)) {
+            return this.bulletins.get(channel); //cache hit
+        } else {
+            List<Bulletin> bul = plugin.bulletinsTable.getChannelBulletins(channel); //load from database
+            if (bul != null) {
+                this.bulletins.put(channel, bul);
+            }
+            return bul;
+        }
+    }
+
+
 }

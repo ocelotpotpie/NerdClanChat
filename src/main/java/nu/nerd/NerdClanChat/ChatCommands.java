@@ -1,5 +1,6 @@
 package nu.nerd.NerdClanChat;
 
+import nu.nerd.NerdClanChat.database.Bulletin;
 import nu.nerd.NerdClanChat.database.Channel;
 import nu.nerd.NerdClanChat.database.ChannelMember;
 import nu.nerd.NerdClanChat.database.PlayerMeta;
@@ -99,6 +100,11 @@ public class ChatCommands implements CommandExecutor {
             return true;
         }
 
+        if (cmd.getName().equalsIgnoreCase("cb")) {
+            this.cb(sender, args);
+            return true;
+        }
+
         return false;
 
     }
@@ -162,6 +168,18 @@ public class ChatCommands implements CommandExecutor {
             return;
         }
         this.listChannelMembers(sender, channel);
+    }
+
+
+    private void cb(CommandSender sender, String[] args) {
+        if (args.length == 1 && args[0].charAt(0) == '#') {
+            plugin.getLogger().info("Print SOME OF the bulletins!");
+            String channel = args[0].substring(1);
+            this.printBulletins(sender, channel);
+        } else {
+            plugin.getLogger().info("Print ALL the bulletins!");
+            // print all bulletins
+        }
     }
 
 
@@ -274,6 +292,38 @@ public class ChatCommands implements CommandExecutor {
         // Output
         sender.sendMessage(ChatColor.GOLD + "Online: " + this.formatList(online, ChatColor.WHITE, ChatColor.GRAY));
         sender.sendMessage(ChatColor.GOLD + "Offline: " + this.formatList(offline, ChatColor.WHITE, ChatColor.GRAY));
+
+    }
+
+
+    private void printBulletins(CommandSender sender, String channelName) {
+
+        Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName.toLowerCase());
+        List<Bulletin> bulletins = plugin.channelCache.getBulletins(channelName.toLowerCase());
+
+        if (channel == null) {
+            sender.sendMessage(ChatColor.RED + "That channel does not exist");
+            return;
+        }
+
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            if (!members.containsKey(player.getUniqueId().toString())) {
+                sender.sendMessage(ChatColor.RED + String.format("You must be a member of %s to see their bulletins", channelName));
+                return;
+            }
+        }
+
+        if (bulletins.size() > 0) {
+            String tag = String.format("%s[%s] ", this.color(channel.getColor()), channel.getName());
+            for (Bulletin bulletin : bulletins) {
+                String msg = tag + this.color(channel.getAlertColor()) + bulletin.getMessage();
+                sender.sendMessage(msg);
+            }
+        } else {
+            sender.sendMessage(ChatColor.RED + String.format("There are no active bulletins for %s", channelName));
+        }
 
     }
 

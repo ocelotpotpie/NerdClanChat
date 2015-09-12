@@ -88,7 +88,4 @@ public class PlayerMetaCache {
     }
 
 
-    //todo: persist cache, probably on a timer and plugin unload. Write meta entries that haven't been peristed yet
-
-
 }

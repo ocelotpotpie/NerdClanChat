@@ -1,7 +1,11 @@
 package nu.nerd.NerdClanChat.database;
 
 
+import com.avaje.ebean.Query;
 import nu.nerd.NerdClanChat.NerdClanChat;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BulletinsTable {
 
@@ -11,6 +15,18 @@ public class BulletinsTable {
 
     public BulletinsTable(NerdClanChat plugin) {
         this.plugin = plugin;
+    }
+
+
+    public List<Bulletin> getChannelBulletins(String channel) {
+        List<Bulletin> bulletins = new ArrayList<Bulletin>();
+        Query<Bulletin> query = plugin.getDatabase().find(Bulletin.class).where().ieq("channel", channel).query();
+        if (query != null) {
+            for (Bulletin bulletin : query.findList()) {
+                bulletins.add(bulletin);
+            }
+        }
+        return bulletins;
     }
 
 
