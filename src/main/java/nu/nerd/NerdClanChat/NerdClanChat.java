@@ -9,6 +9,7 @@ package nu.nerd.NerdClanChat;
 import nu.nerd.NerdClanChat.caching.*;
 import nu.nerd.NerdClanChat.database.*;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
 
 import javax.persistence.PersistenceException;
 import java.util.ArrayList;
@@ -25,6 +26,8 @@ public final class NerdClanChat extends JavaPlugin {
 
     public ChannelCache channelCache;
     public PlayerMetaCache playerMetaCache;
+
+    public PlayerMetaPersistTask playerMetaPersistTask;
 
 
     @Override
@@ -45,6 +48,10 @@ public final class NerdClanChat extends JavaPlugin {
         // Event handlers
         getServer().getPluginManager().registerEvents(new PluginListener(this), this);
 
+        // Scheduled Tasks
+        this.playerMetaPersistTask = new PlayerMetaPersistTask(this);
+        this.playerMetaPersistTask.runTaskTimer(this, 12000L, 12000L);
+
         // Commands
         ChatCommands chatCommands = new ChatCommands(this);
         this.getCommand("clanchat").setExecutor(new ClanChatCommand(this));
@@ -61,6 +68,7 @@ public final class NerdClanChat extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        this.playerMetaPersistTask.cancel();
         getLogger().info("Writing player meta to persistence database...");
         this.playerMetaCache.persistCache();
         getLogger().info("Done.");
