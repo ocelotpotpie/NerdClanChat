@@ -173,7 +173,6 @@ public class ChatCommands implements CommandExecutor {
 
     private void cb(CommandSender sender, String[] args) {
         if (args.length == 1 && args[0].charAt(0) == '#') {
-            plugin.getLogger().info("Print SOME OF the bulletins!");
             String channel = args[0].substring(1);
             this.printBulletins(sender, channel);
         } else {
@@ -231,7 +230,7 @@ public class ChatCommands implements CommandExecutor {
         plugin.getLogger().info(ChatColor.stripColor(msg));
         this.sendRawMessage(channelName, msg);
 
-        // Change default, if applicable, and update last recieved channel
+        // Change default, if applicable, and update last received channel
         if (changeDefault) {
             this.setDefaultChannel(sender, channelName);
         }
@@ -328,13 +327,28 @@ public class ChatCommands implements CommandExecutor {
     }
 
 
-    private void setDefaultChannel(CommandSender sender, String channel) {
+    private void setDefaultChannel(CommandSender sender, String channelName) {
         if (sender instanceof Player) {
+
+            Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
+            HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName.toLowerCase());
             Player player = (Player) sender;
             String UUID = player.getUniqueId().toString();
             PlayerMeta meta = plugin.playerMetaCache.getPlayerMeta(UUID);
-            meta.setDefaultChannel(channel);
+
+            if (!members.containsKey(player.getUniqueId().toString())) {
+                ChannelMember owner = members.get(channel.getOwner());
+                sender.sendMessage(ChatColor.RED + String.format("You are not a member of %s. Please speak to %s to join", channelName, owner));
+                return;
+            }
+
+            if (meta.getDefaultChannel() != channelName) {
+                sender.sendMessage(ChatColor.BLUE + "Your default channel has been changed to " + channelName);
+            }
+
+            meta.setDefaultChannel(channelName);
             plugin.playerMetaCache.updatePlayerMeta(UUID, meta);
+
         }
     }
 
