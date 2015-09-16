@@ -362,7 +362,7 @@ public class ChatCommands implements CommandExecutor {
                 return;
             }
 
-            if (meta.getDefaultChannel() != channelName) {
+            if (!meta.getDefaultChannel().equals(channelName)) {
                 sender.sendMessage(ChatColor.BLUE + "Your default channel has been changed to " + channelName);
             }
 
@@ -414,7 +414,7 @@ public class ChatCommands implements CommandExecutor {
     private String formatList(List<String> list, ChatColor color1, ChatColor color2) {
         StringBuilder sb = new StringBuilder();
         for (String item : list) {
-            if (list.indexOf(list) % 2 == 0) {
+            if (list.indexOf(item) % 2 == 0) {
                 sb.append(color1);
             }
             else {
