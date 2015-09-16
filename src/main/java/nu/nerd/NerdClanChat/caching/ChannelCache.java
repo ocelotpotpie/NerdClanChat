@@ -1,3 +1,8 @@
+/**
+ * This is a disk-first cache that lazy-loads from the database, to make
+ * future reads faster. Writes should be done through the ChannelsTable class.
+ */
+
 package nu.nerd.NerdClanChat.caching;
 
 import nu.nerd.NerdClanChat.NerdClanChat;

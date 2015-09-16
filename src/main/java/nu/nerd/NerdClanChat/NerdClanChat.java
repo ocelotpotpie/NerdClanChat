@@ -26,6 +26,7 @@ public final class NerdClanChat extends JavaPlugin {
 
     public ChannelCache channelCache;
     public PlayerMetaCache playerMetaCache;
+    public TransientPlayerCache transientPlayerCache;
 
     public PlayerMetaPersistTask playerMetaPersistTask;
 
@@ -44,6 +45,7 @@ public final class NerdClanChat extends JavaPlugin {
         // Cache
         this.channelCache = new ChannelCache(this);
         this.playerMetaCache = new PlayerMetaCache(this);
+        this.transientPlayerCache = new TransientPlayerCache(this);
 
         // Event handlers
         getServer().getPluginManager().registerEvents(new PluginListener(this), this);

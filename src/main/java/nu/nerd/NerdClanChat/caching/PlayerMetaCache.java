@@ -1,3 +1,8 @@
+/**
+ * This is a memory-first cache that player commands can write to, and then
+ * is persisted to the database on a schedule.
+ */
+
 package nu.nerd.NerdClanChat.caching;
 
 

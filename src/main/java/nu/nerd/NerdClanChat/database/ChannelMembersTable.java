@@ -5,7 +5,9 @@ import com.avaje.ebean.Query;
 import com.avaje.ebean.SqlUpdate;
 import nu.nerd.NerdClanChat.NerdClanChat;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class ChannelMembersTable {
 
@@ -27,6 +29,18 @@ public class ChannelMembersTable {
             }
         }
         return members;
+    }
+
+
+    public List<ChannelMember> getChannelsForPlayer(String UUID) {
+        List<ChannelMember> channels = new ArrayList<ChannelMember>();
+        Query<ChannelMember> query = plugin.getDatabase().find(ChannelMember.class).where().ieq("uuid", UUID).query();
+        if (query != null) {
+            for (ChannelMember channel : query.findList()) {
+                channels.add(channel);
+            }
+        }
+        return channels;
     }
 
 

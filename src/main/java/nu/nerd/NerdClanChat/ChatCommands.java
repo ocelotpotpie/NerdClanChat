@@ -176,8 +176,7 @@ public class ChatCommands implements CommandExecutor {
             String channel = args[0].substring(1);
             this.printBulletins(sender, channel);
         } else {
-            plugin.getLogger().info("Print ALL the bulletins!");
-            // print all bulletins
+            this.printAllBulletins(sender);
         }
     }
 
@@ -324,6 +323,27 @@ public class ChatCommands implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + String.format("There are no active bulletins for %s", channelName));
         }
 
+    }
+
+
+    private void printAllBulletins(CommandSender sender) {
+        if (sender instanceof Player) {
+
+            List<Bulletin> bulletins;
+            Player player = (Player) sender;
+            String UUID = player.getUniqueId().toString();
+            List<ChannelMember> channels = plugin.transientPlayerCache.getChannelsForPlayer(UUID);
+
+            if (channels != null && channels.size() > 0) {
+                for (ChannelMember cm : channels) {
+                    bulletins = plugin.channelCache.getBulletins(cm.getChannel());
+                    if (bulletins.size() > 0) {
+                        this.printBulletins(sender, cm.getChannel());
+                    }
+                }
+            }
+
+        }
     }
 
 
