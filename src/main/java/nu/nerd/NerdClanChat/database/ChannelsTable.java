@@ -31,6 +31,11 @@ public class ChannelsTable {
     }
 
 
+    public void delete(Channel channel) {
+        plugin.getDatabase().delete(channel);
+    }
+
+
     public void save(Channel channel) {
         plugin.getDatabase().save(channel);
     }

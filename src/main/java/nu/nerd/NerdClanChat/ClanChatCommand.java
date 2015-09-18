@@ -9,15 +9,19 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
+
 
 public class ClanChatCommand implements CommandExecutor {
 
 
     private final NerdClanChat plugin;
+    private HashMap<String, String> confirmChannelDeletion;
 
 
     public ClanChatCommand(NerdClanChat plugin) {
         this.plugin = plugin;
+        this.confirmChannelDeletion = new HashMap<String, String>();
     }
 
 
@@ -32,10 +36,24 @@ public class ClanChatCommand implements CommandExecutor {
             this.printMoreHelpText(sender);
             return true;
         }
-        if (args[0].equalsIgnoreCase("create") && args.length > 1) {
+
+        else if (args[0].equalsIgnoreCase("create") && args.length > 1) {
             this.createChannel(sender, args[1]);
             return true;
         }
+
+        else if (args[0].equalsIgnoreCase("delete") && args.length > 1) {
+            this.deleteChannel(sender, args[1]);
+            return true;
+        }
+
+        else if (args[0].equalsIgnoreCase("confirm") && args.length == 2) {
+            if (args[1].equalsIgnoreCase("delete")) {
+                this.actuallyDeleteChannel(sender);
+            }
+            return true;
+        }
+
         else if (args[0].equalsIgnoreCase("test")) {
             try {
                 Channel ch = new Channel();
@@ -52,6 +70,7 @@ public class ClanChatCommand implements CommandExecutor {
             }
             return true;
         }
+
         else {
             this.printHelpText(sender);
             return true;
@@ -104,6 +123,71 @@ public class ClanChatCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.LIGHT_PURPLE + "Channel created!");
 
         }
+    }
+
+
+    private void deleteChannel(CommandSender sender, String name) {
+
+        if (!this.senderIsOwner(sender, name, false)) {
+            sender.sendMessage(ChatColor.RED + "Only the owner can delete a channel");
+            return;
+        }
+
+        Player owner = (Player) sender;
+        this.confirmChannelDeletion.put(owner.getUniqueId().toString(), name.toLowerCase());
+        sender.sendMessage(ChatColor.RED + "This command is irreversible. Your channel and all associated data WILL Be lost!");
+        sender.sendMessage(ChatColor.BLUE + "Type \"/clanchat confirm delete\" to confirm you actually want to delete #" + name);
+
+    }
+
+
+    private void actuallyDeleteChannel(CommandSender sender) {
+        if (sender instanceof Player) {
+
+            Player owner = (Player) sender;
+            String ownerUUID = owner.getUniqueId().toString();
+            String channelName;
+
+            if (!this.confirmChannelDeletion.containsKey(ownerUUID)) {
+                return;
+            } else {
+                channelName = this.confirmChannelDeletion.get(ownerUUID);
+                this.confirmChannelDeletion.remove(ownerUUID);
+            }
+
+            if (plugin.channelCache.deleteChannel(channelName)) {
+                sender.sendMessage(ChatColor.RED + "Your channel was deleted!");
+            } else {
+                sender.sendMessage(ChatColor.RED + "There was an error deleting your channel.");
+            }
+
+        }
+    }
+
+
+    private boolean senderIsManager(CommandSender sender, String channelName, boolean allowConsole) {
+        Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName.toLowerCase());
+        if (allowConsole && !(sender instanceof Player)) return true;
+        if (!(sender instanceof Player)) return false;
+        if (channel == null) return false;
+        Player player = (Player) sender;
+        String UUID = player.getUniqueId().toString();
+        if (!(members.containsKey(UUID))) return false;
+        if (!members.get(UUID).isManager() || !channel.getOwner().equals(UUID)) return false;
+        return true;
+    }
+
+
+    private boolean senderIsOwner(CommandSender sender, String channelName, boolean allowConsole) {
+        Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
+        if (allowConsole && !(sender instanceof Player)) return true;
+        if (!(sender instanceof Player)) return false;
+        if (channel == null) return false;
+        Player player = (Player) sender;
+        String UUID = player.getUniqueId().toString();
+        if (!channel.getOwner().equals(UUID)) return false;
+        return true;
     }
 
 

@@ -83,4 +83,24 @@ public class ChannelCache {
     }
 
 
+    public boolean deleteChannel(String channel) {
+        Channel ch = this.getChannel(channel);
+        if (ch != null) {
+            try {
+                plugin.channelsTable.delete(ch);
+                plugin.channelMembersTable.deleteChannelMembers(channel);
+                plugin.bulletinsTable.deleteChannelBulletins(channel);
+                plugin.invitesTable.deleteChannelInvites(channel);
+                this.channels.remove(channel);
+                this.members.remove(channel);
+                this.bulletins.remove(channel);
+                return true;
+            } catch (Exception ex) {
+                plugin.getLogger().warning(ex.toString());
+            }
+        }
+        return false;
+    }
+
+
 }

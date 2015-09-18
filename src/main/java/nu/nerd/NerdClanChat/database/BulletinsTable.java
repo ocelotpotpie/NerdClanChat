@@ -2,6 +2,7 @@ package nu.nerd.NerdClanChat.database;
 
 
 import com.avaje.ebean.Query;
+import com.avaje.ebean.SqlUpdate;
 import nu.nerd.NerdClanChat.NerdClanChat;
 
 import java.util.ArrayList;
@@ -27,6 +28,13 @@ public class BulletinsTable {
             }
         }
         return bulletins;
+    }
+
+
+    public void deleteChannelBulletins(String channel) {
+        String query = "delete from clanchat_bulletins where channel=:channel";
+        SqlUpdate update = plugin.getDatabase().createSqlUpdate(query).setParameter("channel", channel);
+        update.execute();
     }
 
 

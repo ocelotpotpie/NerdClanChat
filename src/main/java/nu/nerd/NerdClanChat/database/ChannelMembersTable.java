@@ -53,6 +53,13 @@ public class ChannelMembersTable {
     }
 
 
+    public void deleteChannelMembers(String channel) {
+        String query = "delete from clanchat_members where channel=:channel";
+        SqlUpdate update = plugin.getDatabase().createSqlUpdate(query).setParameter("channel", channel);
+        update.execute();
+    }
+
+
     public void save(ChannelMember channelMember) {
         plugin.getDatabase().save(channelMember);
     }

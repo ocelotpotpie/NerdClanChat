@@ -356,6 +356,11 @@ public class ChatCommands implements CommandExecutor {
             String UUID = player.getUniqueId().toString();
             PlayerMeta meta = plugin.playerMetaCache.getPlayerMeta(UUID);
 
+            if (channel == null) {
+                sender.sendMessage(ChatColor.RED + String.format("The channel \"%s\" doesn't exist", channelName));
+                return;
+            }
+
             if (!members.containsKey(player.getUniqueId().toString())) {
                 ChannelMember owner = members.get(channel.getOwner());
                 sender.sendMessage(ChatColor.RED + String.format("You are not a member of %s. Please speak to %s to join", channelName, owner));

@@ -1,6 +1,7 @@
 package nu.nerd.NerdClanChat.database;
 
 
+import com.avaje.ebean.SqlUpdate;
 import nu.nerd.NerdClanChat.NerdClanChat;
 
 public class InvitesTable {
@@ -11,6 +12,13 @@ public class InvitesTable {
 
     public InvitesTable(NerdClanChat plugin) {
         this.plugin = plugin;
+    }
+
+
+    public void deleteChannelInvites(String channel) {
+        String query = "delete from clanchat_invites where channel=:channel";
+        SqlUpdate update = plugin.getDatabase().createSqlUpdate(query).setParameter("channel", channel);
+        update.execute();
     }
 
 
