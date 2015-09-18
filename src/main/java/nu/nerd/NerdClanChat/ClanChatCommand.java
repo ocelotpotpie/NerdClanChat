@@ -155,11 +155,19 @@ public class ClanChatCommand implements CommandExecutor {
                 this.confirmChannelDeletion.remove(ownerUUID);
             }
 
-            if (plugin.channelCache.deleteChannel(channelName)) {
-                sender.sendMessage(ChatColor.RED + "Your channel was deleted!");
-            } else {
+            try {
+                Channel ch = plugin.channelCache.getChannel(channelName);
+                plugin.channelsTable.delete(ch);
+                plugin.channelMembersTable.deleteChannelMembers(channelName);
+                plugin.bulletinsTable.deleteChannelBulletins(channelName);
+                plugin.invitesTable.deleteChannelInvites(channelName);
+                plugin.channelCache.remove(channelName);
+            } catch (Exception ex) {
+                plugin.getLogger().warning(ex.toString());
                 sender.sendMessage(ChatColor.RED + "There was an error deleting your channel.");
             }
+
+            sender.sendMessage(ChatColor.RED + "Your channel was deleted!");
 
         }
     }
