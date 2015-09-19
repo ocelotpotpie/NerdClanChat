@@ -20,6 +20,15 @@ public class Invite {
     private String UUID;
 
 
+    public Invite() {
+    }
+
+    public Invite(String channel, String UUID) {
+        this.setChannel(channel);
+        this.setUUID(UUID);
+    }
+
+
     public Integer getId() {
         return this.id;
     }

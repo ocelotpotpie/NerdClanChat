@@ -1,6 +1,7 @@
 package nu.nerd.NerdClanChat.database;
 
 
+import com.avaje.ebean.Query;
 import com.avaje.ebean.SqlUpdate;
 import nu.nerd.NerdClanChat.NerdClanChat;
 
@@ -22,8 +23,20 @@ public class InvitesTable {
     }
 
 
-    public void save(Channel channel) {
-        plugin.getDatabase().save(channel);
+    public boolean alreadyInvited(String UUID, String channel) {
+        Query<Invite> query = plugin.getDatabase().find(Invite.class).where()
+                .ieq("uuid", UUID)
+                .ieq("channel", channel)
+                .query();
+        if (query != null) {
+            if (query.findRowCount() > 0) return true;
+        }
+        return false;
+    }
+
+
+    public void save(Invite invite) {
+        plugin.getDatabase().save(invite);
     }
 
 

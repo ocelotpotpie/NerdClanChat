@@ -2,6 +2,7 @@ package nu.nerd.NerdClanChat;
 
 import nu.nerd.NerdClanChat.database.Channel;
 import nu.nerd.NerdClanChat.database.ChannelMember;
+import nu.nerd.NerdClanChat.database.Invite;
 import nu.nerd.NerdClanChat.database.PlayerMeta;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 
 public class ClanChatCommand implements CommandExecutor {
@@ -99,7 +101,16 @@ public class ClanChatCommand implements CommandExecutor {
             if (args.length == 2) {
                 this.listChannelMembers(sender, args[1]);
             } else {
-                sender.sendMessage(ChatColor.RED + "/clanchat members <channel>");
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat members <channel>");
+            }
+            return true;
+        }
+
+        else if (args[0].equalsIgnoreCase("invite")) {
+            if (args.length == 3) {
+                this.inviteMember(sender, args[1], args[2]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat invite <channel> <player>");
             }
             return true;
         }
@@ -215,6 +226,7 @@ public class ClanChatCommand implements CommandExecutor {
             } catch (Exception ex) {
                 plugin.getLogger().warning(ex.toString());
                 sender.sendMessage(ChatColor.RED + "There was an error deleting your channel.");
+                return;
             }
 
             sender.sendMessage(ChatColor.RED + "Your channel was deleted!");
@@ -292,6 +304,47 @@ public class ClanChatCommand implements CommandExecutor {
         // Output
         sender.sendMessage(ChatColor.GOLD + "Online: " + NCCUtil.formatList(online, ChatColor.WHITE, ChatColor.GRAY));
         sender.sendMessage(ChatColor.GOLD + "Offline: " + NCCUtil.formatList(offline, ChatColor.WHITE, ChatColor.GRAY));
+
+    }
+
+
+    private void inviteMember(CommandSender sender, String channelName, String playerName) {
+
+        if (!this.senderIsManager(sender, channelName, false)) {
+            sender.sendMessage(ChatColor.RED + "Sorry, you have to be a manager to do that!");
+            return;
+        }
+
+        channelName = channelName.toLowerCase();
+        Channel channel = plugin.channelCache.getChannel(channelName);
+        PlayerMeta playerMeta = plugin.playerMetaTable.getPlayerMetaByName(playerName.toLowerCase());
+
+        if (playerMeta == null) {
+            sender.sendMessage(ChatColor.RED + "Sorry, but that player hasn't logged on recently. Try again later.");
+            return;
+        }
+
+        if (plugin.invitesTable.alreadyInvited(playerMeta.getUUID(), channelName)) {
+            sender.sendMessage(ChatColor.BLUE + "That player was already invited, but they haven't accepted yet");
+            return;
+        }
+
+        try {
+            Invite inv = new Invite(channelName, playerMeta.getUUID());
+            plugin.invitesTable.save(inv);
+        } catch (Exception ex) {
+            sender.sendMessage(ChatColor.RED + "There was an error processing the invite.");
+            plugin.getLogger().warning(ex.toString());
+            return;
+        }
+
+        Player player = plugin.getServer().getPlayer(UUID.fromString(playerMeta.getUUID()));
+        if (player != null) {
+            player.sendMessage(ChatColor.BLUE + String.format("You have been invited to %s by %s.", channelName, sender.getName()));
+            player.sendMessage(ChatColor.BLUE + String.format("Type %s/clanchat join %s%s to join", ChatColor.GRAY, channelName, ChatColor.BLUE));
+        }
+
+        sender.sendMessage(ChatColor.BLUE + String.format("%s has been invited to %s", playerName, channelName));
 
     }
 
