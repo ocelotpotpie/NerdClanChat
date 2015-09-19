@@ -35,6 +35,15 @@ public class InvitesTable {
     }
 
 
+    public void closeInvitation(String UUID, String channel) {
+        String query = "delete from clanchat_invites where uuid=:uuid and channel=:channel";
+        SqlUpdate update = plugin.getDatabase().createSqlUpdate(query)
+                .setParameter("uuid", UUID)
+                .setParameter("channel", channel);
+        update.execute();
+    }
+
+
     public void save(Invite invite) {
         plugin.getDatabase().save(invite);
     }

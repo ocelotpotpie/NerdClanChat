@@ -115,6 +115,15 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
+        else if (args[0].equalsIgnoreCase("uninvite")) {
+            if (args.length == 3) {
+                this.uninviteMember(sender, args[1], args[2]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat uninvite <channel> <player>");
+            }
+            return true;
+        }
+
         else if (args[0].equalsIgnoreCase("test")) {
             try {
                 Channel ch = new Channel();
@@ -345,6 +354,34 @@ public class ClanChatCommand implements CommandExecutor {
         }
 
         sender.sendMessage(ChatColor.BLUE + String.format("%s has been invited to %s", playerName, channelName));
+
+    }
+
+
+    private void uninviteMember(CommandSender sender, String channelName, String playerName) {
+
+        if (!this.senderIsManager(sender, channelName, false)) {
+            sender.sendMessage(ChatColor.RED + "Sorry, you have to be a manager to do that!");
+            return;
+        }
+
+        channelName = channelName.toLowerCase();
+        PlayerMeta playerMeta = plugin.playerMetaTable.getPlayerMetaByName(playerName.toLowerCase());
+
+        if (!plugin.invitesTable.alreadyInvited(playerMeta.getUUID(), channelName)) {
+            sender.sendMessage(ChatColor.RED + "That player isn't in the invite list.");
+            return;
+        }
+
+        try {
+            plugin.invitesTable.closeInvitation(playerMeta.getUUID(), channelName);
+        } catch (Exception ex) {
+            sender.sendMessage(ChatColor.RED + "There was an error removing the invite.");
+            plugin.getLogger().warning(ex.toString());
+            return;
+        }
+
+        sender.sendMessage(ChatColor.BLUE + "Player removed from the invite list");
 
     }
 
