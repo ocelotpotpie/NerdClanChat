@@ -95,6 +95,15 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
+        else if (args[0].equalsIgnoreCase("members")) {
+            if (args.length == 2) {
+                this.listChannelMembers(sender, args[1]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "/clanchat members <channel>");
+            }
+            return true;
+        }
+
         else if (args[0].equalsIgnoreCase("test")) {
             try {
                 Channel ch = new Channel();
@@ -251,6 +260,52 @@ public class ClanChatCommand implements CommandExecutor {
     }
 
 
+    private void listChannelMembers(CommandSender sender, String channelName) {
+
+        Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName.toLowerCase());
+
+        if (channel == null) {
+            sender.sendMessage(ChatColor.RED + "That channel does not exist");
+            return;
+        }
+
+        if (!this.senderIsMember(sender, channelName) && channel.isSecret()) {
+            sender.sendMessage(ChatColor.RED + "This channel is secret. You must be a member of the channel to see who is in the channel");
+            return;
+        }
+
+        // Collect players into online and offline lists
+        List<String> online = new ArrayList<String>();
+        List<String> offline = new ArrayList<String>();
+        for (Player player : plugin.getServer().getOnlinePlayers()) {
+            if (members.containsKey(player.getUniqueId().toString())) {
+                online.add(player.getName());
+            }
+        }
+        for (ChannelMember member : members.values()) {
+            if (!online.contains(member.getName())) {
+                offline.add(member.getName());
+            }
+        }
+
+        // Output
+        sender.sendMessage(ChatColor.GOLD + "Online: " + NCCUtil.formatList(online, ChatColor.WHITE, ChatColor.GRAY));
+        sender.sendMessage(ChatColor.GOLD + "Offline: " + NCCUtil.formatList(offline, ChatColor.WHITE, ChatColor.GRAY));
+
+    }
+
+
+    private boolean senderIsMember(CommandSender sender, String channelName) {
+        Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName.toLowerCase());
+        if (!(sender instanceof Player)) return true;
+        if (channel == null) return false;
+        Player player = (Player) sender;
+        return members.containsKey(player.getUniqueId().toString());
+    }
+
+
     private boolean senderIsManager(CommandSender sender, String channelName, boolean allowConsole) {
         Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
         HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName.toLowerCase());
@@ -260,8 +315,7 @@ public class ClanChatCommand implements CommandExecutor {
         Player player = (Player) sender;
         String UUID = player.getUniqueId().toString();
         if (!(members.containsKey(UUID))) return false;
-        if (!members.get(UUID).isManager() || !channel.getOwner().equals(UUID)) return false;
-        return true;
+        return !(!members.get(UUID).isManager() || !channel.getOwner().equals(UUID));
     }
 
 
@@ -272,8 +326,7 @@ public class ClanChatCommand implements CommandExecutor {
         if (channel == null) return false;
         Player player = (Player) sender;
         String UUID = player.getUniqueId().toString();
-        if (!channel.getOwner().equals(UUID)) return false;
-        return true;
+        return channel.getOwner().equals(UUID);
     }
 
 
