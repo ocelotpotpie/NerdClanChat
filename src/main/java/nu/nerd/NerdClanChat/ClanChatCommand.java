@@ -9,7 +9,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 
 public class ClanChatCommand implements CommandExecutor {
@@ -17,6 +19,7 @@ public class ClanChatCommand implements CommandExecutor {
 
     private final NerdClanChat plugin;
     private HashMap<String, String> confirmChannelDeletion;
+    private enum ChannelColor { COLOR, TEXTCOLOR, ALERTCOLOR }
 
 
     public ClanChatCommand(NerdClanChat plugin) {
@@ -37,19 +40,57 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
-        else if (args[0].equalsIgnoreCase("create") && args.length > 1) {
-            this.createChannel(sender, args[1]);
+        else if (args[0].equalsIgnoreCase("create")) {
+            if (args.length > 1) {
+                this.createChannel(sender, args[1]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat create <channel>");
+            }
             return true;
         }
 
-        else if (args[0].equalsIgnoreCase("delete") && args.length > 1) {
-            this.deleteChannel(sender, args[1]);
+        else if (args[0].equalsIgnoreCase("delete")) {
+            if (args.length > 1) {
+                this.deleteChannel(sender, args[1]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat delete <channel>");
+            }
             return true;
         }
 
         else if (args[0].equalsIgnoreCase("confirm") && args.length == 2) {
             if (args[1].equalsIgnoreCase("delete")) {
                 this.actuallyDeleteChannel(sender);
+            }
+            return true;
+        }
+
+        else if (args[0].equalsIgnoreCase("color")) {
+            if (args.length == 3) {
+                this.setChannelColor(sender, args[1], args[2], ChannelColor.COLOR);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat color <channel> <color>");
+                sender.sendMessage("Available colors: " + NCCUtil.formatColorList(NCCUtil.colorList()));
+            }
+            return true;
+        }
+
+        else if (args[0].equalsIgnoreCase("textcolor")) {
+            if (args.length == 3) {
+                this.setChannelColor(sender, args[1], args[2], ChannelColor.TEXTCOLOR);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat textcolor <channel> <color>");
+                sender.sendMessage("Available colors: " + NCCUtil.formatColorList(NCCUtil.colorList()));
+            }
+            return true;
+        }
+
+        else if (args[0].equalsIgnoreCase("alertcolor")) {
+            if (args.length == 3) {
+                this.setChannelColor(sender, args[1], args[2], ChannelColor.ALERTCOLOR);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat alertcolor <channel> <color>");
+                sender.sendMessage("Available colors: " + NCCUtil.formatColorList(NCCUtil.colorList()));
             }
             return true;
         }
@@ -170,6 +211,43 @@ public class ClanChatCommand implements CommandExecutor {
             sender.sendMessage(ChatColor.RED + "Your channel was deleted!");
 
         }
+    }
+
+
+    private void setChannelColor(CommandSender sender, String channelName, String color, ChannelColor key) {
+
+        if (!this.senderIsManager(sender, channelName, false)) {
+            sender.sendMessage(ChatColor.RED + "Sorry, you have to be a manager to do that!");
+            return;
+        }
+
+        channelName = channelName.toLowerCase();
+        color = color.toUpperCase();
+        Channel channel = plugin.channelCache.getChannel(channelName);
+
+        if (channel == null) {
+            sender.sendMessage(ChatColor.RED + String.format("The channel \"%s\" doesn't exist", channelName));
+            return;
+        }
+
+        if (!NCCUtil.colorList().contains(color)) {
+            sender.sendMessage(ChatColor.RED + "Only one of the following colors can be used:");
+            sender.sendMessage(NCCUtil.formatColorList(NCCUtil.colorList()));
+            return;
+        }
+
+        if (key == ChannelColor.ALERTCOLOR) {
+            channel.setAlertColor(color);
+        } else if (key == ChannelColor.TEXTCOLOR) {
+            channel.setTextColor(color);
+        } else {
+            channel.setColor(color);
+        }
+        plugin.channelsTable.save(channel);
+        plugin.channelCache.updateChannel(channelName, channel);
+        String msg = String.format("Channel %s changed to %s%s!", key.name().toLowerCase(), ChatColor.valueOf(color), color);
+        sender.sendMessage(ChatColor.BLUE + msg);
+
     }
 
 

@@ -115,10 +115,10 @@ public class ChatCommands implements CommandExecutor {
         String message;
         if (args[0].charAt(0) == '#') {
             channel = args[0].substring(1);
-            message = this.joinArray(" ", Arrays.copyOfRange(args, 1, args.length));
+            message = NCCUtil.joinArray(" ", Arrays.copyOfRange(args, 1, args.length));
         } else {
             channel = getDefaultChannel(sender);
-            message = this.joinArray(" ", args);
+            message = NCCUtil.joinArray(" ", args);
             if (channel == null) {
                 sender.sendMessage(String.format("%sYou don't have a default channel set (or aren't in any channels). Run %s/clanchat%s for help", ChatColor.RED, ChatColor.LIGHT_PURPLE, ChatColor.RED));
                 return;
@@ -130,7 +130,7 @@ public class ChatCommands implements CommandExecutor {
 
     private void cq(CommandSender sender, String[] args) {
         String channel = args[0].substring(1);
-        String message = this.joinArray(" ", Arrays.copyOfRange(args, 1, args.length));
+        String message = NCCUtil.joinArray(" ", Arrays.copyOfRange(args, 1, args.length));
         this.sendMessage(sender, channel, message, MessageType.NORMAL, false);
     }
 
@@ -138,7 +138,7 @@ public class ChatCommands implements CommandExecutor {
     private void cr(CommandSender sender, String[] args) {
         if (sender instanceof Player) {
             Player player = (Player) sender;
-            String message = this.joinArray(" ", args);
+            String message = NCCUtil.joinArray(" ", args);
             String channelName = this.getLastChannelReceived(player);
             if (channelName != null) {
                 this.sendMessage(sender, channelName, message, MessageType.NORMAL, true);
@@ -213,8 +213,8 @@ public class ChatCommands implements CommandExecutor {
             msg = String.format("%s %s* %s %s", tag, this.color(channel.getTextColor()), ChatColor.stripColor(name), message);
         }
         else if (type == MessageType.ALERT) {
-            tag = String.format("%s[%s] %s<%s> ", this.color(channel.getColor()), channel.getName(), this.color(channel.getAlertColor()), name);
-            msg = tag + this.color(channel.getAlertColor()) + "" + ChatColor.UNDERLINE + message;
+            tag = String.format("%s[%s] %s<%s%s> ", this.color(channel.getColor()), channel.getName(), this.color(channel.getAlertColor()), name, this.color(channel.getAlertColor()));
+            msg = tag + ChatColor.UNDERLINE + message;
         }
         else if (type == MessageType.SARCASM) {
             tag = String.format("%s[%s] %s<%s%s> ", this.color(channel.getColor()), channel.getName(), ChatColor.GRAY, name, ChatColor.GRAY);
@@ -288,8 +288,8 @@ public class ChatCommands implements CommandExecutor {
         }
 
         // Output
-        sender.sendMessage(ChatColor.GOLD + "Online: " + this.formatList(online, ChatColor.WHITE, ChatColor.GRAY));
-        sender.sendMessage(ChatColor.GOLD + "Offline: " + this.formatList(offline, ChatColor.WHITE, ChatColor.GRAY));
+        sender.sendMessage(ChatColor.GOLD + "Online: " + NCCUtil.formatList(online, ChatColor.WHITE, ChatColor.GRAY));
+        sender.sendMessage(ChatColor.GOLD + "Offline: " + NCCUtil.formatList(offline, ChatColor.WHITE, ChatColor.GRAY));
 
     }
 
@@ -403,35 +403,6 @@ public class ChatCommands implements CommandExecutor {
         String UUID = player.getUniqueId().toString();
         PlayerMeta meta = plugin.playerMetaCache.getPlayerMeta(UUID);
         return meta.getLastReceived();
-    }
-
-
-    private String joinArray(String separator, String[] arr) {
-        StringBuilder sb = new StringBuilder();
-        for (String s : arr) {
-            sb.append(s);
-            sb.append(separator);
-        }
-        return sb.toString().trim();
-    }
-
-
-    private String formatList(List<String> list, ChatColor color1, ChatColor color2) {
-        StringBuilder sb = new StringBuilder();
-        for (String item : list) {
-            if (list.indexOf(item) % 2 == 0) {
-                sb.append(color1);
-            }
-            else {
-                sb.append(color2);
-            }
-            sb.append(item);
-            if (list.indexOf(item) != (list.size() - 1)) {
-                sb.append(color1);
-                sb.append(", ");
-            }
-        }
-        return sb.toString();
     }
 
 
