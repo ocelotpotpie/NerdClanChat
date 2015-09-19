@@ -124,6 +124,24 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
+        else if (args[0].equalsIgnoreCase("changeowner")) {
+            if (args.length == 3) {
+                this.changeChannelOwner(sender, args[1], args[2]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat changeowner <channel> <player>");
+            }
+            return true;
+        }
+
+        else if (args[0].equalsIgnoreCase("join")) {
+            if (args.length == 2) {
+                this.joinChannel(sender, args[1]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat join <channel>");
+            }
+            return true;
+        }
+
         else if (args[0].equalsIgnoreCase("test")) {
             try {
                 Channel ch = new Channel();
@@ -181,7 +199,11 @@ public class ClanChatCommand implements CommandExecutor {
                 return;
             }
 
-            plugin.channelCache.updateChannel(name, ch); //Cache the newly created channel
+            //Cache the newly created channel
+            HashMap<String, ChannelMember> members = new HashMap<String, ChannelMember>();
+            members.put(name, mem);
+            plugin.channelCache.updateChannel(name, ch);
+            plugin.channelCache.updateChannelMembers(name, members);
 
             //Update owner's player meta to make this their default channel
             String UUID = owner.getUniqueId().toString();
@@ -325,8 +347,7 @@ public class ClanChatCommand implements CommandExecutor {
         }
 
         channelName = channelName.toLowerCase();
-        Channel channel = plugin.channelCache.getChannel(channelName);
-        PlayerMeta playerMeta = plugin.playerMetaTable.getPlayerMetaByName(playerName.toLowerCase());
+        PlayerMeta playerMeta = plugin.playerMetaCache.getPlayerMetaByName(playerName.toLowerCase());
 
         if (playerMeta == null) {
             sender.sendMessage(ChatColor.RED + "Sorry, but that player hasn't logged on recently. Try again later.");
@@ -366,7 +387,7 @@ public class ClanChatCommand implements CommandExecutor {
         }
 
         channelName = channelName.toLowerCase();
-        PlayerMeta playerMeta = plugin.playerMetaTable.getPlayerMetaByName(playerName.toLowerCase());
+        PlayerMeta playerMeta = plugin.playerMetaCache.getPlayerMetaByName(playerName.toLowerCase());
 
         if (!plugin.invitesTable.alreadyInvited(playerMeta.getUUID(), channelName)) {
             sender.sendMessage(ChatColor.RED + "That player isn't in the invite list.");
@@ -382,6 +403,112 @@ public class ClanChatCommand implements CommandExecutor {
         }
 
         sender.sendMessage(ChatColor.BLUE + "Player removed from the invite list");
+
+    }
+
+
+    private void changeChannelOwner(CommandSender sender, String channelName, String newOwner) {
+
+        if (!this.senderIsManager(sender, channelName, true) && !sender.hasPermission("nerdclanchat.admin")) {
+            sender.sendMessage(ChatColor.RED + "Sorry, you have to be a manager to do that!");
+            return;
+        }
+
+        channelName = channelName.toLowerCase();
+        PlayerMeta newOwnerMeta = plugin.playerMetaCache.getPlayerMetaByName(newOwner.toLowerCase());
+        Channel channel = plugin.channelCache.getChannel(channelName);
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName);
+
+        if (newOwnerMeta == null) {
+            sender.sendMessage(ChatColor.RED + "Sorry, but that player hasn't logged on recently. Try again later.");
+            return;
+        }
+
+        if (!members.containsKey(newOwnerMeta.getUUID())) {
+            sender.sendMessage(ChatColor.RED + "The new owner must be a member of the channel.");
+            return;
+        }
+
+        try {
+            // Make the old owner a manager, if they're not already
+            ChannelMember oldOwnerMember = members.get(channel.getOwner());
+            oldOwnerMember.setManager(true);
+            members.put(channel.getOwner(), oldOwnerMember);
+            plugin.channelMembersTable.save(oldOwnerMember);
+
+            // Change the channel owner
+            channel.setOwner(newOwnerMeta.getUUID());
+            plugin.channelsTable.save(channel);
+
+            // Ensure the new owner is a manager, for consistency
+            ChannelMember newOwnerMember = members.get(newOwnerMeta.getUUID());
+            newOwnerMember.setManager(true);
+            members.put(newOwnerMeta.getUUID(), newOwnerMember);
+            plugin.channelMembersTable.save(newOwnerMember);
+
+            // Update cache
+            plugin.channelCache.updateChannel(channelName, channel);
+            plugin.channelCache.updateChannelMembers(channelName, members);
+
+        } catch (Exception ex) {
+            sender.sendMessage(ChatColor.RED + "There was an error changing the channel owner.");
+            plugin.getLogger().warning(ex.toString());
+            return;
+        }
+
+        sender.sendMessage(ChatColor.BLUE + String.format("You have relinquished ownership on %s to %s", channelName, newOwner));
+
+    }
+
+
+    private void joinChannel(CommandSender sender, String channelName) {
+
+        if (!(sender instanceof Player)) {
+            return;
+        }
+
+        channelName = channelName.toLowerCase();
+        Player player = (Player) sender;
+        String UUID = player.getUniqueId().toString();
+        PlayerMeta meta = plugin.playerMetaCache.getPlayerMeta(UUID);
+        Channel channel = plugin.channelCache.getChannel(channelName);
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName);
+
+        if (members.containsKey(UUID)) {
+            sender.sendMessage(ChatColor.RED + "You're already a member of this channel!");
+            return;
+        }
+
+        if (channel == null) {
+            sender.sendMessage(ChatColor.RED + "That channel doesn't exist...yet.");
+            return;
+        }
+
+        if (!channel.isPub() && !plugin.invitesTable.alreadyInvited(UUID, channelName)) {
+            ChannelMember owner = members.get(channel.getOwner());
+            sender.sendMessage(ChatColor.RED + String.format("You can't join a non-public channel without an invite. Please speak with %s about joining", owner.getName()));
+            return;
+        }
+
+        try {
+            ChannelMember mem = new ChannelMember(channelName, UUID, player.getName(), false);
+            members.put(UUID, mem);
+            plugin.channelMembersTable.save(mem);
+            plugin.channelCache.updateChannelMembers(channelName, members);
+            plugin.invitesTable.closeInvitation(UUID, channelName);
+        } catch (Exception ex) {
+            sender.sendMessage(ChatColor.RED + "There was an error joining the channel.");
+            plugin.getLogger().warning(ex.toString());
+            return;
+        }
+
+        meta.setDefaultChannel(channelName);
+        plugin.playerMetaCache.updatePlayerMeta(UUID, meta);
+
+        sender.sendMessage(ChatColor.BLUE + String.format("You will receive bulletins from this channel on login. To unsubscribe run /clanchat unsubscribe %s", channelName));
+        String helpMsg = String.format("Type %s/c #%s <msg>%s to say something to this channel, or just %s/c <msg>%s if this is already your default channel", ChatColor.GRAY, channelName, ChatColor.BLUE, ChatColor.GRAY, ChatColor.BLUE);
+        sender.sendMessage(ChatColor.BLUE + helpMsg);
+        this.sendRawMessage(channelName, String.format("%s%s%s has joined %s%s%s, say hi!", ChatColor.RED, player.getName(), ChatColor.BLUE, ChatColor.valueOf(channel.getColor()), channelName, ChatColor.BLUE));
 
     }
 
@@ -417,6 +544,16 @@ public class ClanChatCommand implements CommandExecutor {
         Player player = (Player) sender;
         String UUID = player.getUniqueId().toString();
         return channel.getOwner().equals(UUID);
+    }
+
+
+    private void sendRawMessage(String channelName, String message) {
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName.toLowerCase());
+        for (Player player : plugin.getServer().getOnlinePlayers()) {
+            if (members.containsKey(player.getUniqueId().toString())) {
+                player.sendMessage(message);
+            }
+        }
     }
 
 

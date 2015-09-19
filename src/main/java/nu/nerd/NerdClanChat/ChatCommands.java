@@ -363,7 +363,7 @@ public class ChatCommands implements CommandExecutor {
 
             if (!members.containsKey(player.getUniqueId().toString())) {
                 ChannelMember owner = members.get(channel.getOwner());
-                sender.sendMessage(ChatColor.RED + String.format("You are not a member of %s. Please speak to %s to join", channelName, owner));
+                sender.sendMessage(ChatColor.RED + String.format("You are not a member of %s. Please speak to %s to join", channelName, owner.getName()));
                 return;
             }
 
@@ -425,7 +425,7 @@ public class ChatCommands implements CommandExecutor {
             sender.sendMessage(errorMsg);
             return false;
         }
-        if (!members.get(UUID).isManager() || !channel.getOwner().equals(UUID)) {
+        if (!members.get(UUID).isManager() && !channel.getOwner().equals(UUID)) {
             sender.sendMessage(errorMsg);
             return false;
         }

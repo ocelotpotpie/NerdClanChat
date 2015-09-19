@@ -69,6 +69,16 @@ public class ChannelCache {
     }
 
 
+    public void updateChannelMembers(String channel, HashMap<String, ChannelMember> channelMembers) {
+        if (channel == null || channel.length() < 1) return;
+        channel = channel.toLowerCase();
+        if (this.members.containsKey(channel)) {
+            this.members.remove(channel);
+        }
+        this.members.put(channel, channelMembers);
+    }
+
+
     public List<Bulletin> getBulletins(String channel) {
         channel = channel.toLowerCase();
         if (this.bulletins.containsKey(channel)) {

@@ -74,6 +74,20 @@ public class PlayerMetaCache {
     }
 
 
+    public PlayerMeta getPlayerMetaByName(String name) {
+        PlayerMeta retVal = null;
+        for (PlayerMeta entry : this.playerMeta.values()) {
+            if (entry.getName().equalsIgnoreCase(name)) {
+                retVal = entry;
+            }
+        }
+        if (retVal == null) {
+            retVal = plugin.playerMetaTable.getPlayerMetaByName(name.toLowerCase());
+        }
+        return retVal;
+    }
+
+
     public void persistCache() {
         plugin.getDatabase().beginTransaction();
         try {
