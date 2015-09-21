@@ -225,14 +225,16 @@ public class ChatCommands implements CommandExecutor {
             msg = tag + this.color(channel.getTextColor()) + message;
         }
 
+        // Change default, if applicable
+        if (changeDefault) {
+            this.setDefaultChannel(sender, channelName);
+        }
+
         // Send message
         plugin.getLogger().info(ChatColor.stripColor(msg));
         this.sendRawMessage(channelName, msg);
 
-        // Change default, if applicable, and update last received channel
-        if (changeDefault) {
-            this.setDefaultChannel(sender, channelName);
-        }
+        // Update last received channel
         for (Player player : plugin.getServer().getOnlinePlayers()) {
             if (members.containsKey(player.getUniqueId().toString())) {
                 this.updateLastChannelReceived(player, channelName);
@@ -361,13 +363,13 @@ public class ChatCommands implements CommandExecutor {
                 return;
             }
 
-            if (!members.containsKey(player.getUniqueId().toString())) {
+            if (!members.containsKey(UUID)) {
                 ChannelMember owner = members.get(channel.getOwner());
                 sender.sendMessage(ChatColor.RED + String.format("You are not a member of %s. Please speak to %s to join", channelName, owner.getName()));
                 return;
             }
 
-            if (!meta.getDefaultChannel().equals(channelName)) {
+            if (meta.getDefaultChannel() == null || !meta.getDefaultChannel().equals(channelName)) {
                 sender.sendMessage(ChatColor.BLUE + "Your default channel has been changed to " + channelName);
             }
 
