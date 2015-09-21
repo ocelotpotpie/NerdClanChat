@@ -133,6 +133,15 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
+        else if (args[0].equalsIgnoreCase("addmanager")) {
+            if (args.length == 3) {
+                this.addChannelManager(sender, args[1], args[2]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat addmanager <channel> <player>");
+            }
+            return true;
+        }
+
         else if (args[0].equalsIgnoreCase("join")) {
             if (args.length == 2) {
                 this.joinChannel(sender, args[1]);
@@ -409,7 +418,7 @@ public class ClanChatCommand implements CommandExecutor {
 
     private void changeChannelOwner(CommandSender sender, String channelName, String newOwner) {
 
-        if (!this.senderIsManager(sender, channelName, true) && !sender.hasPermission("nerdclanchat.admin")) {
+        if (!this.senderIsOwner(sender, channelName, true) && !sender.hasPermission("nerdclanchat.admin")) {
             sender.sendMessage(ChatColor.RED + "Sorry, you have to be a manager to do that!");
             return;
         }
@@ -419,12 +428,7 @@ public class ClanChatCommand implements CommandExecutor {
         Channel channel = plugin.channelCache.getChannel(channelName);
         HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName);
 
-        if (newOwnerMeta == null) {
-            sender.sendMessage(ChatColor.RED + "Sorry, but that player hasn't logged on recently. Try again later.");
-            return;
-        }
-
-        if (!members.containsKey(newOwnerMeta.getUUID())) {
+        if (newOwnerMeta == null || !members.containsKey(newOwnerMeta.getUUID())) {
             sender.sendMessage(ChatColor.RED + "The new owner must be a member of the channel.");
             return;
         }
@@ -457,6 +461,43 @@ public class ClanChatCommand implements CommandExecutor {
         }
 
         sender.sendMessage(ChatColor.BLUE + String.format("You have relinquished ownership on %s to %s", channelName, newOwner));
+
+    }
+
+
+    private void addChannelManager(CommandSender sender, String channelName, String playerName) {
+
+        if (!this.senderIsOwner(sender, channelName, false)) {
+            sender.sendMessage(ChatColor.RED + "Only the owner may add or remove managers");
+            return;
+        }
+
+        channelName = channelName.toLowerCase();
+        PlayerMeta managerMeta = plugin.playerMetaCache.getPlayerMetaByName(playerName);
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName);
+
+        if (managerMeta == null || !members.containsKey(managerMeta.getUUID())) {
+            sender.sendMessage(ChatColor.RED + "Only members can be made managers. Invite them to the channel, and wait for them to join first.");
+            return;
+        }
+
+        if (members.get(managerMeta.getUUID()).isManager()) {
+            sender.sendMessage(ChatColor.RED + String.format("%s is already a manager", playerName));
+            return;
+        }
+
+        ChannelMember cm = members.get(managerMeta.getUUID());
+        cm.setManager(true);
+        members.put(cm.getUUID(), cm);
+        plugin.channelMembersTable.save(cm);
+        plugin.channelCache.updateChannelMembers(channelName, members);
+
+        sender.sendMessage(ChatColor.BLUE + String.format("%s added as a manager!", playerName));
+
+        Player player = plugin.getServer().getPlayer(UUID.fromString(managerMeta.getUUID()));
+        if (player != null) {
+            player.sendMessage(ChatColor.BLUE + String.format("You have been made a manager in %s", channelName));
+        }
 
     }
 
