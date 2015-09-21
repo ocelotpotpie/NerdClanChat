@@ -142,6 +142,15 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
+        else if (args[0].equalsIgnoreCase("removemanager")) {
+            if (args.length == 3) {
+                this.removeChannelManager(sender, args[1], args[2]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat removemanager <channel> <player>");
+            }
+            return true;
+        }
+
         else if (args[0].equalsIgnoreCase("join")) {
             if (args.length == 2) {
                 this.joinChannel(sender, args[1]);
@@ -498,6 +507,33 @@ public class ClanChatCommand implements CommandExecutor {
         if (player != null) {
             player.sendMessage(ChatColor.BLUE + String.format("You have been made a manager in %s", channelName));
         }
+
+    }
+
+
+    private void removeChannelManager(CommandSender sender, String channelName, String playerName) {
+
+        if (!this.senderIsOwner(sender, channelName, false)) {
+            sender.sendMessage(ChatColor.RED + "Only the owner may add or remove managers");
+            return;
+        }
+
+        channelName = channelName.toLowerCase();
+        PlayerMeta managerMeta = plugin.playerMetaCache.getPlayerMetaByName(playerName);
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName);
+
+        if (managerMeta == null || !members.containsKey(managerMeta.getUUID()) || !members.get(managerMeta.getUUID()).isManager()) {
+            sender.sendMessage(ChatColor.RED + String.format("%s is not a manager in %s", playerName, channelName));
+            return;
+        }
+
+        ChannelMember cm = members.get(managerMeta.getUUID());
+        cm.setManager(false);
+        members.put(cm.getUUID(), cm);
+        plugin.channelMembersTable.save(cm);
+        plugin.channelCache.updateChannelMembers(channelName, members);
+
+        sender.sendMessage(ChatColor.BLUE + String.format("%s removed as a manager from %s", playerName, channelName));
 
     }
 
