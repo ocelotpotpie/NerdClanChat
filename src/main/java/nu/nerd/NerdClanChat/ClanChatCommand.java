@@ -151,6 +151,15 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
+        else if (args[0].equalsIgnoreCase("listmanagers")) {
+            if (args.length == 2) {
+                this.listChannelManagers(sender, args[1]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat listmanagers <channel>");
+            }
+            return true;
+        }
+
         else if (args[0].equalsIgnoreCase("join")) {
             if (args.length == 2) {
                 this.joinChannel(sender, args[1]);
@@ -534,6 +543,38 @@ public class ClanChatCommand implements CommandExecutor {
         plugin.channelCache.updateChannelMembers(channelName, members);
 
         sender.sendMessage(ChatColor.BLUE + String.format("%s removed as a manager from %s", playerName, channelName));
+
+    }
+
+
+    private void listChannelManagers(CommandSender sender, String channelName) {
+
+        if (!this.senderIsOwner(sender, channelName, true)) {
+            sender.sendMessage(ChatColor.RED + "Only channel owners can do that");
+            return;
+        }
+
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName);
+
+        List<String> online = new ArrayList<String>();
+        List<String> offline = new ArrayList<String>();
+        for (Player player : plugin.getServer().getOnlinePlayers()) {
+            if (members.containsKey(player.getUniqueId().toString())) {
+                if (members.get(player.getUniqueId().toString()).isManager()) {
+                    online.add(player.getName());
+                }
+            }
+        }
+        for (ChannelMember member : members.values()) {
+            if (member.isManager()) {
+                if (!online.contains(member.getName())) {
+                    offline.add(member.getName());
+                }
+            }
+        }
+
+        sender.sendMessage(ChatColor.GOLD + "Online: " + NCCUtil.formatList(online, ChatColor.WHITE, ChatColor.GRAY));
+        sender.sendMessage(ChatColor.GOLD + "Offline: " + NCCUtil.formatList(offline, ChatColor.WHITE, ChatColor.GRAY));
 
     }
 
