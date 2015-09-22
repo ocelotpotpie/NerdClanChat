@@ -178,19 +178,11 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
-        else if (args[0].equalsIgnoreCase("test")) {
-            try {
-                Channel ch = new Channel();
-                ch.setName(args[1]);
-                ch.setOwner("fake-uuid-placeholder");
-                ch.setColor("BLUE");
-                ch.setTextColor("GRAY");
-                ch.setAlertColor("GRAY");
-                ch.setSecret(false);
-                ch.setPub(false);
-                plugin.channelsTable.save(ch);
-            } catch (Exception ex) {
-                sender.sendMessage(ex.toString());
+        else if (args[0].equalsIgnoreCase("leave")) {
+            if (args.length == 2) {
+                this.leaveChannel(sender, args[1]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat leave <channel>");
             }
             return true;
         }
@@ -621,7 +613,7 @@ public class ClanChatCommand implements CommandExecutor {
         try {
             plugin.channelMembersTable.delete(member);
             members.remove(member.getUUID());
-            plugin.channelCache.updateChannelMembers(member.getUUID(), members);
+            plugin.channelCache.updateChannelMembers(channelName, members);
             sender.sendMessage(ChatColor.BLUE + "Member removed.");
         } catch (Exception ex) {
             sender.sendMessage(ChatColor.RED + "There was an error removing the channel member.");
@@ -633,9 +625,7 @@ public class ClanChatCommand implements CommandExecutor {
 
     private void joinChannel(CommandSender sender, String channelName) {
 
-        if (!(sender instanceof Player)) {
-            return;
-        }
+        if (!(sender instanceof Player)) return;
 
         channelName = channelName.toLowerCase();
         Player player = (Player) sender;
@@ -679,6 +669,56 @@ public class ClanChatCommand implements CommandExecutor {
         String helpMsg = String.format("Type %s/c #%s <msg>%s to say something to this channel, or just %s/c <msg>%s if this is already your default channel", ChatColor.GRAY, channelName, ChatColor.BLUE, ChatColor.GRAY, ChatColor.BLUE);
         sender.sendMessage(ChatColor.BLUE + helpMsg);
         this.sendRawMessage(channelName, String.format("%s%s%s has joined %s%s%s, say hi!", ChatColor.RED, player.getName(), ChatColor.BLUE, ChatColor.valueOf(channel.getColor()), channelName, ChatColor.BLUE));
+
+    }
+
+
+    private void leaveChannel(CommandSender sender, String channelName) {
+
+        if (!(sender instanceof Player)) return;
+
+        channelName = channelName.toLowerCase();
+        Channel channel = plugin.channelCache.getChannel(channelName);
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName);
+        Player player = (Player) sender;
+        String UUID = player.getUniqueId().toString();
+
+        if (!members.containsKey(UUID)) {
+            sender.sendMessage(ChatColor.RED + "You can't leave a channel you're not in");
+            return;
+        }
+
+        if (channel.getOwner().equals(UUID) && members.size() > 1) {
+            sender.sendMessage(ChatColor.RED + "The owner can't leave their channel unless the channel is empty. Please set someone else as owner first, or use \"/clanchat delete <channel>\" to remove the channel.");
+        }
+
+        // Leave the channel
+        try {
+            plugin.channelMembersTable.delete(members.get(UUID));
+            members.remove(UUID);
+            plugin.channelCache.updateChannelMembers(channelName, members);
+        } catch (Exception ex) {
+            sender.sendMessage(ChatColor.RED + "There was an error leaving the channel.");
+            plugin.getLogger().warning(ex.toString());
+            return;
+        }
+
+        // Delete the channel if it's empty when the owner leaves it
+        if (members.size() == 0) {
+            try {
+                plugin.channelsTable.delete(channel);
+                plugin.channelMembersTable.deleteChannelMembers(channelName);
+                plugin.bulletinsTable.deleteChannelBulletins(channelName);
+                plugin.invitesTable.deleteChannelInvites(channelName);
+                plugin.channelCache.remove(channelName);
+            } catch (Exception ex) {
+                plugin.getLogger().warning(ex.toString());
+                sender.sendMessage(ChatColor.RED + "There was an error deleting your channel.");
+                return;
+            }
+        }
+
+        sender.sendMessage(ChatColor.BLUE + "You have been removed from " + channelName);
 
     }
 
