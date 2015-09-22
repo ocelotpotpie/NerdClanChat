@@ -160,6 +160,15 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
+        else if (args[0].equalsIgnoreCase("remove")) {
+            if (args.length == 3) {
+                this.removeMemberFromChannel(sender, args[1], args[2]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat remove <channel> <player>");
+            }
+            return true;
+        }
+
         else if (args[0].equalsIgnoreCase("join")) {
             if (args.length == 2) {
                 this.joinChannel(sender, args[1]);
@@ -437,7 +446,7 @@ public class ClanChatCommand implements CommandExecutor {
     private void changeChannelOwner(CommandSender sender, String channelName, String newOwner) {
 
         if (!this.senderIsOwner(sender, channelName, true) && !sender.hasPermission("nerdclanchat.admin")) {
-            sender.sendMessage(ChatColor.RED + "Sorry, you have to be a manager to do that!");
+            sender.sendMessage(ChatColor.RED + "Only the owner can set a new owner for the channel");
             return;
         }
 
@@ -579,6 +588,49 @@ public class ClanChatCommand implements CommandExecutor {
     }
 
 
+    private void removeMemberFromChannel(CommandSender sender, String channelName, String playerName) {
+
+        if (!this.senderIsManager(sender, channelName, false)) {
+            sender.sendMessage(ChatColor.RED + "Sorry, you have to be a manager to do that!");
+            return;
+        }
+
+        PlayerMeta playerMeta = plugin.playerMetaCache.getPlayerMetaByName(playerName);
+        Channel channel = plugin.channelCache.getChannel(channelName);
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName);
+        boolean senderIsOwner = this.senderIsOwner(sender, channelName, false);
+        ChannelMember member;
+
+        if (playerMeta != null && members.containsKey(playerMeta.getUUID())) {
+            member = members.get(playerMeta.getUUID());
+        } else {
+            sender.sendMessage(ChatColor.RED + "That player isn't a member.");
+            return;
+        }
+
+        if (member.getUUID().equals(channel.getOwner())) {
+            sender.sendMessage(ChatColor.RED + "You cannot remove the owner from a channel!");
+            return;
+        }
+
+        if (!senderIsOwner && member.isManager()) {
+            sender.sendMessage(ChatColor.RED + "Only the owner can remove a manager");
+            return;
+        }
+
+        try {
+            plugin.channelMembersTable.delete(member);
+            members.remove(member.getUUID());
+            plugin.channelCache.updateChannelMembers(member.getUUID(), members);
+            sender.sendMessage(ChatColor.BLUE + "Member removed.");
+        } catch (Exception ex) {
+            sender.sendMessage(ChatColor.RED + "There was an error removing the channel member.");
+            plugin.getLogger().warning(ex.toString());
+        }
+
+    }
+
+
     private void joinChannel(CommandSender sender, String channelName) {
 
         if (!(sender instanceof Player)) {
@@ -650,7 +702,7 @@ public class ClanChatCommand implements CommandExecutor {
         Player player = (Player) sender;
         String UUID = player.getUniqueId().toString();
         if (!(members.containsKey(UUID))) return false;
-        return !(!members.get(UUID).isManager() || !channel.getOwner().equals(UUID));
+        return (members.get(UUID).isManager() || channel.getOwner().equals(UUID));
     }
 
 

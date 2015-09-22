@@ -60,6 +60,11 @@ public class ChannelMembersTable {
     }
 
 
+    public void delete(ChannelMember channelMember) {
+        plugin.getDatabase().delete(channelMember);
+    }
+
+
     public void save(ChannelMember channelMember) {
         plugin.getDatabase().save(channelMember);
     }
