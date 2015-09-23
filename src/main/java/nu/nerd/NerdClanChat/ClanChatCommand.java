@@ -827,10 +827,17 @@ public class ClanChatCommand implements CommandExecutor {
 
         Channel channel = plugin.channelCache.getChannel(channelName);
         List<Bulletin> bulletins = plugin.channelCache.getBulletins(channelName);
-        Bulletin nb = new Bulletin(channelName, message);
-        bulletins.add(nb);
-        plugin.bulletinsTable.save(nb);
-        plugin.channelCache.updateBulletins(channelName, bulletins);
+
+        try {
+            Bulletin nb = new Bulletin(channelName, message);
+            bulletins.add(nb);
+            plugin.bulletinsTable.save(nb);
+            plugin.channelCache.updateBulletins(channelName, bulletins);
+        } catch (Exception ex) {
+            plugin.getLogger().warning(ex.toString());
+            sender.sendMessage(ChatColor.RED + "There was an error adding your bulletin.");
+            return;
+        }
 
         sender.sendMessage(ChatColor.BLUE + "Bulletin added successfully.");
         String msg = String.format("%s[%s] %s%s", ChatColor.valueOf(channel.getColor()), channelName, ChatColor.valueOf(channel.getAlertColor()), message);
@@ -859,10 +866,16 @@ public class ClanChatCommand implements CommandExecutor {
             return;
         }
 
-        Bulletin rb = bulletins.get(index - 1);
-        bulletins.remove(rb);
-        plugin.bulletinsTable.delete(rb);
-        plugin.channelCache.updateBulletins(channelName, bulletins);
+        try {
+            Bulletin rb = bulletins.get(index - 1);
+            bulletins.remove(rb);
+            plugin.bulletinsTable.delete(rb);
+            plugin.channelCache.updateBulletins(channelName, bulletins);
+        } catch (Exception ex) {
+            plugin.getLogger().warning(ex.toString());
+            sender.sendMessage(ChatColor.RED + "There was an error removing your bulletin.");
+            return;
+        }
 
         sender.sendMessage(ChatColor.BLUE + "Bulletin successfully removed");
 
@@ -888,11 +901,16 @@ public class ClanChatCommand implements CommandExecutor {
             return;
         }
 
-        member.setSubscribed(true);
-        members.put(UUID, member);
-        plugin.channelMembersTable.save(member);
-        plugin.channelCache.updateChannelMembers(channelName, members);
-        sender.sendMessage(ChatColor.BLUE + String.format("You are now subscribed to bulletins made in %s", channelName));
+        try {
+            member.setSubscribed(true);
+            members.put(UUID, member);
+            plugin.channelMembersTable.save(member);
+            plugin.channelCache.updateChannelMembers(channelName, members);
+            sender.sendMessage(ChatColor.BLUE + String.format("You are now subscribed to bulletins made in %s", channelName));
+        } catch (Exception ex) {
+            plugin.getLogger().warning(ex.toString());
+            sender.sendMessage(ChatColor.RED + "There was an error subscribing to the channel's bulletins.");
+        }
 
     }
 
