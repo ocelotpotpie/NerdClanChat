@@ -38,6 +38,11 @@ public class BulletinsTable {
     }
 
 
+    public void delete(Bulletin bulletin) {
+        plugin.getDatabase().delete(bulletin);
+    }
+
+
     public void save(Bulletin bulletin) {
         plugin.getDatabase().save(bulletin);
     }

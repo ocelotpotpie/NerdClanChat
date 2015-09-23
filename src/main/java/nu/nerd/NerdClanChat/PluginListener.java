@@ -44,4 +44,7 @@ public class PluginListener implements Listener {
     }
 
 
+    //todo: onLogin event to print bulletins
+
+
 }

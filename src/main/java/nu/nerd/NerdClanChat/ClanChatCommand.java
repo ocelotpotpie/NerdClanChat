@@ -205,6 +205,16 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
+        else if (args[0].equalsIgnoreCase("removebulletin")) {
+            if (args.length == 3) {
+                this.removeBulletin(sender, args[1], args[2]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat removebulletin <channel> <number>");
+                sender.sendMessage(ChatColor.RED + "The <number> field starts at 1 from the top bulletin.");
+            }
+            return true;
+        }
+
         else {
             this.printHelpText(sender);
             return true;
@@ -839,6 +849,36 @@ public class ClanChatCommand implements CommandExecutor {
         sender.sendMessage(ChatColor.BLUE + "Bulletin added successfully.");
         String msg = String.format("%s[%s] %s%s", ChatColor.valueOf(channel.getColor()), channelName, ChatColor.valueOf(channel.getAlertColor()), message);
         this.sendRawMessage(channelName, msg);
+
+    }
+
+
+    private void removeBulletin(CommandSender sender, String channelName, String number) {
+
+        if (!this.senderIsManager(sender, channelName, false)) {
+            sender.sendMessage(ChatColor.RED + "Sorry, you have to be a manager to do that!");
+            return;
+        }
+
+        Integer index = Integer.parseInt(number);
+        List<Bulletin> bulletins = plugin.channelCache.getBulletins(channelName);
+
+        if (index < 1) {
+            sender.sendMessage(ChatColor.RED + "The bulletin index specified must be a non-zero integer");
+            return;
+        }
+
+        if (index > bulletins.size()) {
+            sender.sendMessage(ChatColor.RED + "There is no bulletin at that index");
+            return;
+        }
+
+        Bulletin rb = bulletins.get(index-1);
+        bulletins.remove(rb);
+        plugin.bulletinsTable.delete(rb);
+        plugin.channelCache.updateBulletins(channelName, bulletins);
+
+        sender.sendMessage(ChatColor.BLUE + "Bulletin successfully removed");
 
     }
 
