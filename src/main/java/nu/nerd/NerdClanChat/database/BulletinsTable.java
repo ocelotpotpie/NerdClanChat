@@ -38,8 +38,8 @@ public class BulletinsTable {
     }
 
 
-    public void save(Channel channel) {
-        plugin.getDatabase().save(channel);
+    public void save(Bulletin bulletin) {
+        plugin.getDatabase().save(bulletin);
     }
 
 

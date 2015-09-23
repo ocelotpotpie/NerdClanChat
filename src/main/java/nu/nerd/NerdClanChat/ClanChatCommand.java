@@ -1,19 +1,13 @@
 package nu.nerd.NerdClanChat;
 
-import nu.nerd.NerdClanChat.database.Channel;
-import nu.nerd.NerdClanChat.database.ChannelMember;
-import nu.nerd.NerdClanChat.database.Invite;
-import nu.nerd.NerdClanChat.database.PlayerMeta;
+import nu.nerd.NerdClanChat.database.*;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 public class ClanChatCommand implements CommandExecutor {
@@ -199,6 +193,15 @@ public class ClanChatCommand implements CommandExecutor {
 
         else if (args[0].equalsIgnoreCase("public")) {
             this.listAllPublicChannels(sender);
+            return true;
+        }
+
+        else if (args[0].equalsIgnoreCase("addbulletin")) {
+            if (args.length > 2) {
+                this.addBulletin(sender, args);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat addbulletin <channel> <bulletin>");
+            }
             return true;
         }
 
@@ -813,6 +816,30 @@ public class ClanChatCommand implements CommandExecutor {
         } else {
             sender.sendMessage(ChatColor.RED + "There are no public channels yet.");
         }
+    }
+
+
+    private void addBulletin(CommandSender sender, String[] args) {
+
+        String channelName = args[1].toLowerCase();
+        String message = NCCUtil.joinArray(" ", Arrays.copyOfRange(args, 2, args.length));
+
+        if (!this.senderIsManager(sender, channelName, false)) {
+            sender.sendMessage(ChatColor.RED + "Sorry, you have to be a manager to do that!");
+            return;
+        }
+
+        Channel channel = plugin.channelCache.getChannel(channelName);
+        List<Bulletin> bulletins = plugin.channelCache.getBulletins(channelName);
+        Bulletin nb = new Bulletin(channelName, message);
+        bulletins.add(nb);
+        plugin.bulletinsTable.save(nb);
+        plugin.channelCache.updateBulletins(channelName, bulletins);
+
+        sender.sendMessage(ChatColor.BLUE + "Bulletin added successfully.");
+        String msg = String.format("%s[%s] %s%s", ChatColor.valueOf(channel.getColor()), channelName, ChatColor.valueOf(channel.getAlertColor()), message);
+        this.sendRawMessage(channelName, msg);
+
     }
 
 

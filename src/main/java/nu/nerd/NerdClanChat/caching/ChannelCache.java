@@ -93,6 +93,16 @@ public class ChannelCache {
     }
 
 
+    public void updateBulletins(String channel, List<Bulletin> bulletins) {
+        if (channel == null || channel.length() < 1) return;
+        channel = channel.toLowerCase();
+        if (this.bulletins.containsKey(channel)) {
+            this.bulletins.remove(channel);
+        }
+        this.bulletins.put(channel, bulletins);
+    }
+
+
     public void remove(String channel) {
         this.channels.remove(channel);
         this.members.remove(channel);

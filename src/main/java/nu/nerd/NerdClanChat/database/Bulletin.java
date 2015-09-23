@@ -21,6 +21,15 @@ public class Bulletin {
     private String message;
 
 
+    public Bulletin() {
+    }
+
+    public Bulletin(String channel, String message) {
+        this.setChannel(channel);
+        this.setMessage(message);
+    }
+
+
     public Integer getId() {
         return this.id;
     }
