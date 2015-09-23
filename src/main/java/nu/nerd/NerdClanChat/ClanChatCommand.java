@@ -229,7 +229,7 @@ public class ClanChatCommand implements CommandExecutor {
 
             //Cache the newly created channel
             HashMap<String, ChannelMember> members = new HashMap<String, ChannelMember>();
-            members.put(name, mem);
+            members.put(owner.getUniqueId().toString(), mem);
             plugin.channelCache.updateChannel(name, ch);
             plugin.channelCache.updateChannelMembers(name, members);
 
