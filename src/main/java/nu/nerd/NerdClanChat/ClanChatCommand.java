@@ -187,6 +187,11 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
+        else if (args[0].equalsIgnoreCase("list")) {
+            this.listChannels(sender);
+            return true;
+        }
+
         else {
             this.printHelpText(sender);
             return true;
@@ -719,6 +724,32 @@ public class ClanChatCommand implements CommandExecutor {
         }
 
         sender.sendMessage(ChatColor.BLUE + "You have been removed from " + channelName);
+
+    }
+
+
+    private void listChannels(CommandSender sender) {
+
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(ChatColor.RED + "Console can't join channels. Try \"/clanchat public\" to list all public channels.");
+            return;
+        }
+
+        Player player = (Player) sender;
+        String UUID = player.getUniqueId().toString();
+        List<ChannelMember> channels = plugin.transientPlayerCache.getChannelsForPlayer(UUID);
+        List<Channel> channelList = new ArrayList<Channel>();
+
+        if (channels.size() < 1) {
+            sender.sendMessage(ChatColor.RED + "You aren't in any channels");
+            return;
+        }
+
+        for (ChannelMember cm : channels) {
+            Channel channel = plugin.channelCache.getChannel(cm.getChannel());
+            channelList.add(channel);
+        }
+        sender.sendMessage(NCCUtil.formatChannelList(channelList));
 
     }
 

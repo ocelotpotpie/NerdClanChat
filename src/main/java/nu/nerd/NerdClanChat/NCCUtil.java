@@ -1,11 +1,9 @@
 package nu.nerd.NerdClanChat;
 
+import nu.nerd.NerdClanChat.database.Channel;
 import org.bukkit.ChatColor;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class NCCUtil {
 
@@ -32,6 +30,20 @@ public class NCCUtil {
             sb.append(item);
             if (list.indexOf(item) != (list.size() - 1)) {
                 sb.append(color1);
+                sb.append(", ");
+            }
+        }
+        return sb.toString();
+    }
+
+
+    public static String formatChannelList(List<Channel> list) {
+        StringBuilder sb = new StringBuilder();
+        for (Channel channel : list) {
+            sb.append(ChatColor.valueOf(channel.getColor()));
+            sb.append(channel.getName());
+            if (list.indexOf(channel) != (list.size() -1)) {
+                sb.append(ChatColor.WHITE);
                 sb.append(", ");
             }
         }
