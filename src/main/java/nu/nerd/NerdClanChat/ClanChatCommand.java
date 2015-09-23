@@ -28,12 +28,10 @@ public class ClanChatCommand implements CommandExecutor {
 
         if (args.length < 1) {
             this.printHelpText(sender);
-            return true;
         }
 
-        if (args[0].equalsIgnoreCase("more")) {
+        else if (args[0].equalsIgnoreCase("more")) {
             this.printMoreHelpText(sender);
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("create")) {
@@ -42,7 +40,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat create <channel>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("delete")) {
@@ -51,14 +48,12 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat delete <channel>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("confirm") && args.length == 2) {
             if (args[1].equalsIgnoreCase("delete")) {
                 this.actuallyDeleteChannel(sender);
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("color")) {
@@ -68,7 +63,6 @@ public class ClanChatCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat color <channel> <color>");
                 sender.sendMessage("Available colors: " + NCCUtil.formatColorList(NCCUtil.colorList()));
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("textcolor")) {
@@ -78,7 +72,6 @@ public class ClanChatCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat textcolor <channel> <color>");
                 sender.sendMessage("Available colors: " + NCCUtil.formatColorList(NCCUtil.colorList()));
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("alertcolor")) {
@@ -88,7 +81,6 @@ public class ClanChatCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat alertcolor <channel> <color>");
                 sender.sendMessage("Available colors: " + NCCUtil.formatColorList(NCCUtil.colorList()));
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("members")) {
@@ -97,7 +89,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat members <channel>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("invite")) {
@@ -106,7 +97,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat invite <channel> <player>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("uninvite")) {
@@ -115,7 +105,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat uninvite <channel> <player>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("changeowner")) {
@@ -124,7 +113,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat changeowner <channel> <player>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("addmanager")) {
@@ -133,7 +121,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat addmanager <channel> <player>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("removemanager")) {
@@ -142,7 +129,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat removemanager <channel> <player>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("listmanagers")) {
@@ -151,7 +137,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat listmanagers <channel>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("remove")) {
@@ -160,7 +145,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat remove <channel> <player>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("join")) {
@@ -169,7 +153,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat join <channel>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("leave")) {
@@ -178,22 +161,18 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat leave <channel>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("list")) {
             this.listChannels(sender);
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("channels")) {
             this.listAllChannels(sender);
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("public")) {
             this.listAllPublicChannels(sender);
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("addbulletin")) {
@@ -202,7 +181,6 @@ public class ClanChatCommand implements CommandExecutor {
             } else {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat addbulletin <channel> <bulletin>");
             }
-            return true;
         }
 
         else if (args[0].equalsIgnoreCase("removebulletin")) {
@@ -212,13 +190,21 @@ public class ClanChatCommand implements CommandExecutor {
                 sender.sendMessage(ChatColor.RED + "Usage: /clanchat removebulletin <channel> <number>");
                 sender.sendMessage(ChatColor.RED + "The <number> field starts at 1 from the top bulletin.");
             }
-            return true;
+        }
+
+        else if (args[0].equalsIgnoreCase("subscribe")) {
+            if (args.length == 2) {
+                this.subscribeToBulletins(sender, args[1]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat subscribe <channel>");
+            }
         }
 
         else {
             this.printHelpText(sender);
-            return true;
         }
+
+        return true;
 
     }
 
@@ -873,12 +859,40 @@ public class ClanChatCommand implements CommandExecutor {
             return;
         }
 
-        Bulletin rb = bulletins.get(index-1);
+        Bulletin rb = bulletins.get(index - 1);
         bulletins.remove(rb);
         plugin.bulletinsTable.delete(rb);
         plugin.channelCache.updateBulletins(channelName, bulletins);
 
         sender.sendMessage(ChatColor.BLUE + "Bulletin successfully removed");
+
+    }
+
+
+    private void subscribeToBulletins(CommandSender sender, String channelName) {
+
+        if (!(sender instanceof Player)) return;
+
+        if (!this.senderIsMember(sender, channelName)) {
+            sender.sendMessage(ChatColor.RED + String.format("You must be a member of %s to subscribe to their bulletins", channelName));
+            return;
+        }
+
+        Player player = (Player) sender;
+        String UUID = player.getUniqueId().toString();
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName);
+        ChannelMember member = members.get(UUID);
+
+        if (member.isSubscribed()) {
+            sender.sendMessage(ChatColor.RED + "You are already subscribed to that channel");
+            return;
+        }
+
+        member.setSubscribed(true);
+        members.put(UUID, member);
+        plugin.channelMembersTable.save(member);
+        plugin.channelCache.updateChannelMembers(channelName, members);
+        sender.sendMessage(ChatColor.BLUE + String.format("You are now subscribed to bulletins made in %s", channelName));
 
     }
 

@@ -45,6 +45,7 @@ public class PluginListener implements Listener {
 
 
     //todo: onLogin event to print bulletins
+    //todo: maybe add config with option to limit bulletins printed on login, to reduce spam
 
 
 }
