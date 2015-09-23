@@ -4,6 +4,9 @@ package nu.nerd.NerdClanChat.database;
 import com.avaje.ebean.Query;
 import nu.nerd.NerdClanChat.NerdClanChat;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ChannelsTable {
 
 
@@ -22,6 +25,18 @@ public class ChannelsTable {
             ch = query.findUnique();
         }
         return ch;
+    }
+
+
+    public List<Channel> getAllChannels() {
+        List<Channel> channels = new ArrayList<Channel>();
+        Query<Channel> query = plugin.getDatabase().find(Channel.class).where().ne("name", "").query();
+        if (query != null) {
+            for (Channel channel : query.findList()) {
+                channels.add(channel);
+            }
+        }
+        return channels;
     }
 
 

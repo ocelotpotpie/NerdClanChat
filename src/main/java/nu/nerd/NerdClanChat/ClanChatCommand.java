@@ -192,6 +192,16 @@ public class ClanChatCommand implements CommandExecutor {
             return true;
         }
 
+        else if (args[0].equalsIgnoreCase("channels")) {
+            this.listAllChannels(sender);
+            return true;
+        }
+
+        else if (args[0].equalsIgnoreCase("public")) {
+            this.listAllPublicChannels(sender);
+            return true;
+        }
+
         else {
             this.printHelpText(sender);
             return true;
@@ -751,6 +761,58 @@ public class ClanChatCommand implements CommandExecutor {
         }
         sender.sendMessage(NCCUtil.formatChannelList(channelList));
 
+    }
+
+
+    private void listAllChannels(CommandSender sender) {
+
+        if (!sender.hasPermission("nerdclanchat.admin")) {
+            sender.sendMessage(ChatColor.RED + "You do not have permission to do this!");
+            return;
+        }
+
+        List<Channel> channels = plugin.channelsTable.getAllChannels();
+        StringBuilder sb = new StringBuilder();
+
+        for (Channel channel : channels) {
+
+            PlayerMeta owner = plugin.playerMetaCache.getPlayerMeta(channel.getOwner());
+
+            sb.append(ChatColor.BLUE);
+            sb.append(channel.getName());
+
+            if (owner != null) {
+                sb.append(ChatColor.WHITE);
+                sb.append(": ");
+                sb.append(ChatColor.GRAY);
+                sb.append(owner.getName());
+            }
+
+            if (channels.indexOf(channel) != (channels.size() -1)) {
+                sb.append(ChatColor.WHITE);
+                sb.append(", ");
+            }
+
+        }
+
+        sender.sendMessage(sb.toString());
+
+    }
+
+
+    private void listAllPublicChannels(CommandSender sender) {
+        List<Channel> channels = plugin.channelsTable.getAllChannels();
+        List<Channel> list = new ArrayList<Channel>();
+        for (Channel c : channels) {
+            if (c.isPub()) {
+                list.add(c);
+            }
+        }
+        if (list.size() > 0) {
+            sender.sendMessage(NCCUtil.formatChannelList(list));
+        } else {
+            sender.sendMessage(ChatColor.RED + "There are no public channels yet.");
+        }
     }
 
 
