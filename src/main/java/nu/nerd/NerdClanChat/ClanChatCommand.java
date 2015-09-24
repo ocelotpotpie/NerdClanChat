@@ -200,6 +200,14 @@ public class ClanChatCommand implements CommandExecutor {
             }
         }
 
+        else if (args[0].equalsIgnoreCase("unsubscribe")) {
+            if (args.length == 2) {
+                this.unsubscribeFromBulletins(sender, args[1]);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat unsubscribe <channel>");
+            }
+        }
+
         else {
             this.printHelpText(sender);
         }
@@ -910,6 +918,34 @@ public class ClanChatCommand implements CommandExecutor {
         } catch (Exception ex) {
             plugin.getLogger().warning(ex.toString());
             sender.sendMessage(ChatColor.RED + "There was an error subscribing to the channel's bulletins.");
+        }
+
+    }
+
+
+    private void unsubscribeFromBulletins(CommandSender sender, String channelName) {
+
+        if (!(sender instanceof Player)) return;
+
+        Player player = (Player) sender;
+        String UUID = player.getUniqueId().toString();
+        HashMap<String, ChannelMember> members = plugin.channelCache.getChannelMembers(channelName);
+
+        if (!members.containsKey(UUID) || !members.get(UUID).isSubscribed()) {
+            sender.sendMessage(ChatColor.RED + "You are not subscribed to that channel.");
+            return;
+        }
+
+        try {
+            ChannelMember member = members.get(UUID);
+            member.setSubscribed(false);
+            members.put(UUID, member);
+            plugin.channelMembersTable.save(member);
+            plugin.channelCache.updateChannelMembers(channelName, members);
+            sender.sendMessage(ChatColor.BLUE + String.format("You are now unsubscribed from bulletins made in %s", channelName));
+        } catch (Exception ex) {
+            plugin.getLogger().warning(ex.toString());
+            sender.sendMessage(ChatColor.RED + "There was an error unsubscribing from the channel's bulletins.");
         }
 
     }
