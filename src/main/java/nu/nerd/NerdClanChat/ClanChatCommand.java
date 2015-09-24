@@ -208,6 +208,10 @@ public class ClanChatCommand implements CommandExecutor {
             }
         }
 
+        else if (args[0].equalsIgnoreCase("subscriptions")) {
+            this.listSubscriptions(sender);
+        }
+
         else {
             this.printHelpText(sender);
         }
@@ -947,6 +951,32 @@ public class ClanChatCommand implements CommandExecutor {
             plugin.getLogger().warning(ex.toString());
             sender.sendMessage(ChatColor.RED + "There was an error unsubscribing from the channel's bulletins.");
         }
+
+    }
+
+
+    private void listSubscriptions(CommandSender sender) {
+
+        if (!(sender instanceof Player)) return;
+
+        Player player = (Player) sender;
+        String UUID = player.getUniqueId().toString();
+        List<ChannelMember> channels = plugin.transientPlayerCache.getChannelsForPlayer(UUID);
+        List<String> subscribed = new ArrayList<String>();
+
+        for (ChannelMember channel : channels) {
+            if (channel.isSubscribed()) {
+                subscribed.add(channel.getChannel());
+            }
+        }
+
+        if (subscribed.size() < 1) {
+            sender.sendMessage(ChatColor.BLUE + "You have no current subscriptions.");
+            return;
+        }
+
+        String list = NCCUtil.formatList(subscribed, ChatColor.GRAY, ChatColor.GRAY);
+        sender.sendMessage(ChatColor.BLUE + "Current subscriptions: " + ChatColor.GRAY + list);
 
     }
 
