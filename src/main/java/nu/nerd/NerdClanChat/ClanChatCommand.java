@@ -957,6 +957,8 @@ public class ClanChatCommand implements CommandExecutor {
 
     private void listSubscriptions(CommandSender sender) {
 
+        //todo: fix cache desync (see comment in TransientPlayerCache). Whole cache needs work.
+
         if (!(sender instanceof Player)) return;
 
         Player player = (Player) sender;

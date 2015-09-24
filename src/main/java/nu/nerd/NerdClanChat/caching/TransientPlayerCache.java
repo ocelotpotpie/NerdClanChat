@@ -38,7 +38,8 @@ public class TransientPlayerCache {
 
 
     public List<ChannelMember> getChannelsForPlayer(String UUID) {
-        //todo: replace transient cache with a function to just loop through and build the list in ChannelCache
+        //todo: replace transient cache with a function to just loop through and build the list in ChannelCache?
+        // this would require re-doing the caching system, as the possibility for partial results exists...
         if (this.memberOfChannels.containsKey(UUID)) {
             return this.memberOfChannels.get(UUID); //cache hit
         } else {

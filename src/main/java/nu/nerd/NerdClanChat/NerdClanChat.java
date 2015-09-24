@@ -9,7 +9,6 @@ package nu.nerd.NerdClanChat;
 import nu.nerd.NerdClanChat.caching.*;
 import nu.nerd.NerdClanChat.database.*;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
 
 import javax.persistence.PersistenceException;
 import java.util.ArrayList;
