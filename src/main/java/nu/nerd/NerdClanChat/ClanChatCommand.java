@@ -224,6 +224,18 @@ public class ClanChatCommand implements CommandExecutor {
             }
         }
 
+        else if (args[0].equalsIgnoreCase("flags")) {
+            if (args.length == 4) {
+                this.setFlags(sender, args);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat flags <channel> <flag> <boolean>");
+                sender.sendMessage("Two flags are supported: 'public' and 'secret'.");
+                sender.sendMessage("A 'public' channel can be joined by anyone, without invite.");
+                sender.sendMessage("A 'secret' channel requires membership to view channel members.");
+                sender.sendMessage("A boolean is either the word 'true' or 'false'.");
+            }
+        }
+
         else {
             this.printHelpText(sender);
         }
@@ -1008,6 +1020,46 @@ public class ClanChatCommand implements CommandExecutor {
             this.sendRawMessage(channelName, msg);
         } else {
             sender.sendMessage(ChatColor.RED + "Invalid channel");
+        }
+
+    }
+
+
+    private void setFlags(CommandSender sender, String[] args) {
+
+        String channelName = args[1].toLowerCase();
+        String flagKey = args[2].toLowerCase();
+        String flagValue = args[3].toLowerCase();
+        Channel channel = plugin.channelCache.getChannel(channelName);
+
+        if (!this.senderIsOwner(sender, channelName, false)) {
+            sender.sendMessage(ChatColor.RED + "This command is only available to the channel owner");
+            return;
+        }
+
+        if (!flagValue.equals("true") && !flagValue.equals("false")) {
+            sender.sendMessage(ChatColor.RED + "Invalid command, type /clanchat flags for help (invalid boolean)");
+            return;
+        }
+
+        if (flagKey.equals("public")) {
+            channel.setPub(Boolean.valueOf(flagValue));
+        }
+        else if (flagKey.equals("secret")) {
+            channel.setSecret(Boolean.valueOf(flagValue));
+        }
+        else {
+            sender.sendMessage(ChatColor.RED + "Invalid command, type /clanchat flags for help (invalid flag)");
+            return;
+        }
+
+        try {
+            plugin.channelsTable.save(channel);
+            plugin.channelCache.updateChannel(channelName, channel);
+            sender.sendMessage(ChatColor.BLUE + String.format("Flag %s has been set to %s for %s", flagKey, flagValue, channelName));
+        } catch (Exception ex) {
+            plugin.getLogger().warning(ex.toString());
+            sender.sendMessage(ChatColor.RED + "There was an error updating the channel flags.");
         }
 
     }
