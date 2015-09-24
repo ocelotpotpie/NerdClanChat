@@ -1,10 +1,16 @@
 package nu.nerd.NerdClanChat;
 
 
+import nu.nerd.NerdClanChat.database.Bulletin;
+import nu.nerd.NerdClanChat.database.Channel;
+import nu.nerd.NerdClanChat.database.ChannelMember;
 import nu.nerd.NerdClanChat.database.PlayerMeta;
+import org.bukkit.ChatColor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+
+import java.util.List;
 
 public class PluginListener implements Listener {
 
@@ -18,7 +24,13 @@ public class PluginListener implements Listener {
 
 
     @EventHandler
-    public void updateStoredPlayerName(PlayerLoginEvent event) {
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        this.updateStoredPlayerName(event);
+        this.printBulletins(event);
+    }
+
+
+    public void updateStoredPlayerName(PlayerJoinEvent event) {
 
         boolean isNewPlayer = false;
         String UUID = event.getPlayer().getUniqueId().toString();
@@ -44,8 +56,28 @@ public class PluginListener implements Listener {
     }
 
 
-    //todo: onLogin event to print bulletins
-    //todo: maybe add config with option to limit bulletins printed on login, to reduce spam
+    public void printBulletins(PlayerJoinEvent event) {
+
+        //todo: maybe add config with option to limit bulletins printed on login, to reduce spam
+
+        String UUID = event.getPlayer().getUniqueId().toString();
+        List<ChannelMember> channels = plugin.transientPlayerCache.getChannelsForPlayer(UUID);
+
+        if (channels != null && channels.size() > 0) {
+            for (ChannelMember cm : channels) {
+                List<Bulletin> bulletins = plugin.channelCache.getBulletins(cm.getChannel());
+                if (bulletins.size() > 0 && cm.isSubscribed()) {
+                    Channel channel = plugin.channelCache.getChannel(cm.getChannel());
+                    String tag = String.format("%s[%s] ", ChatColor.valueOf(channel.getColor()), channel.getName());
+                    for (Bulletin bulletin : bulletins) {
+                        String msg = tag + ChatColor.valueOf(channel.getAlertColor()) + bulletin.getMessage();
+                        event.getPlayer().sendMessage(msg);
+                    }
+                }
+            }
+        }
+
+    }
 
 
 }
