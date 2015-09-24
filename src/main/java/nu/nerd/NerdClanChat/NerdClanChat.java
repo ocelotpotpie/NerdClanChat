@@ -11,6 +11,7 @@ import nu.nerd.NerdClanChat.database.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.persistence.PersistenceException;
+import java.io.File;
 import java.util.ArrayList;
 
 
@@ -28,10 +29,14 @@ public final class NerdClanChat extends JavaPlugin {
     public TransientPlayerCache transientPlayerCache;
 
     public PlayerMetaPersistTask playerMetaPersistTask;
+    public Configuration config;
 
 
     @Override
     public void onEnable() {
+
+        // Config
+        this.config = new Configuration(this);
 
         // Database
         this.setUpDatabase();

@@ -58,10 +58,9 @@ public class PluginListener implements Listener {
 
     public void printBulletins(PlayerJoinEvent event) {
 
-        //todo: maybe add config with option to limit bulletins printed on login, to reduce spam
-
         String UUID = event.getPlayer().getUniqueId().toString();
         List<ChannelMember> channels = plugin.transientPlayerCache.getChannelsForPlayer(UUID);
+        Integer limit = plugin.config.BULLETIN_LIMIT;
 
         if (channels != null && channels.size() > 0) {
             for (ChannelMember cm : channels) {
@@ -69,6 +68,9 @@ public class PluginListener implements Listener {
                 if (bulletins.size() > 0 && cm.isSubscribed()) {
                     Channel channel = plugin.channelCache.getChannel(cm.getChannel());
                     String tag = String.format("%s[%s] ", ChatColor.valueOf(channel.getColor()), channel.getName());
+                    if (limit > 0 && bulletins.size() > limit) {
+                        bulletins = bulletins.subList(bulletins.size()-limit, bulletins.size());
+                    }
                     for (Bulletin bulletin : bulletins) {
                         String msg = tag + ChatColor.valueOf(channel.getAlertColor()) + bulletin.getMessage();
                         event.getPlayer().sendMessage(msg);

@@ -1,0 +1,2 @@
+bulletins:
+  limit-on-login: 0 #Reduces bulletin spam on login. Use 0 to disable limit.

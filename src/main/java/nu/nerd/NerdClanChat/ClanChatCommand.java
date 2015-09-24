@@ -236,6 +236,15 @@ public class ClanChatCommand implements CommandExecutor {
             }
         }
 
+        else if (args[0].equalsIgnoreCase("reloadconfig")) {
+            if (sender.hasPermission("nerdclanchat.admin")) {
+                plugin.config.load();
+                sender.sendMessage(ChatColor.BLUE + "Configuration reloaded.");
+            } else {
+                sender.sendMessage(ChatColor.RED + "You don't have permission to do that.");
+            }
+        }
+
         else {
             this.printHelpText(sender);
         }
@@ -1163,6 +1172,7 @@ public class ClanChatCommand implements CommandExecutor {
         sender.sendMessage(ChatColor.BLUE + "/clanchat subscriptions" + ChatColor.WHITE + " - List your current bulletin subscriptions.");
         if (sender.hasPermission("nerdclanchat.admin")) {
             sender.sendMessage(ChatColor.BLUE + "/clanchat channels" + ChatColor.WHITE + " - Lists all the channels and their owners.");
+            sender.sendMessage(ChatColor.BLUE + "/clanchat reloadconfig" + ChatColor.WHITE + " - Reload the plugin configuration.");
         }
         if (!(sender instanceof Player)) {
             sender.sendMessage(ChatColor.BLUE + "/clanchat chat <channel> <message>" + ChatColor.WHITE + " - Chats to an arbitrary channel. Only available to console.");
