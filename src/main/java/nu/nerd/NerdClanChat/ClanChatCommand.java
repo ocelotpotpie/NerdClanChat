@@ -212,6 +212,18 @@ public class ClanChatCommand implements CommandExecutor {
             this.listSubscriptions(sender);
         }
 
+        else if (args[0].equalsIgnoreCase("chat")) {
+            if (sender instanceof Player) {
+                sender.sendMessage(ChatColor.RED + "Sorry, you can't use this command");
+                return true;
+            }
+            if (args.length > 2) {
+                this.consoleChat(sender, args);
+            } else {
+                sender.sendMessage(ChatColor.RED + "Usage: /clanchat chat <channel> <message>");
+            }
+        }
+
         else {
             this.printHelpText(sender);
         }
@@ -979,6 +991,24 @@ public class ClanChatCommand implements CommandExecutor {
 
         String list = NCCUtil.formatList(subscribed, ChatColor.GRAY, ChatColor.GRAY);
         sender.sendMessage(ChatColor.BLUE + "Current subscriptions: " + ChatColor.GRAY + list);
+
+    }
+
+
+    private void consoleChat(CommandSender sender, String[] args) {
+
+        String channelName = args[1].toLowerCase();
+        String message = NCCUtil.joinArray(" ", Arrays.copyOfRange(args, 2, args.length));
+        Channel channel = plugin.channelCache.getChannel(channelName);
+
+        if (channel != null) {
+            String name = ChatColor.RED + "~console";
+            String tag = String.format("%s[%s] %s<%s%s> ", ChatColor.valueOf(channel.getColor()), channel.getName(), ChatColor.GRAY, name, ChatColor.GRAY);
+            String msg = tag + ChatColor.valueOf(channel.getTextColor()) + message;
+            this.sendRawMessage(channelName, msg);
+        } else {
+            sender.sendMessage(ChatColor.RED + "Invalid channel");
+        }
 
     }
 
