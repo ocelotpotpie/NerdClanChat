@@ -11,6 +11,7 @@ package nu.nerd.NerdClanChat.caching;
 import nu.nerd.NerdClanChat.NerdClanChat;
 import nu.nerd.NerdClanChat.database.ChannelMember;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,9 +38,14 @@ public class TransientPlayerCache {
     }
 
 
+    public void clearPlayerCache(Collection<ChannelMember> channelMembers) {
+        for (ChannelMember member : channelMembers) {
+            this.clearPlayerCache(member.getUUID());
+        }
+    }
+
+
     public List<ChannelMember> getChannelsForPlayer(String UUID) {
-        //todo: replace transient cache with a function to just loop through and build the list in ChannelCache?
-        // this would require re-doing the caching system, as the possibility for partial results exists...
         if (this.memberOfChannels.containsKey(UUID)) {
             return this.memberOfChannels.get(UUID); //cache hit
         } else {

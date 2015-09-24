@@ -14,7 +14,6 @@ public class PlayerMetaPersistTask extends BukkitRunnable {
     public void run() {
         plugin.getLogger().info("Writing player meta to persistence database...");
         plugin.playerMetaCache.persistCache();
-        plugin.transientPlayerCache.clearCache();
         plugin.getLogger().info("Done.");
     }
 

@@ -76,6 +76,7 @@ public class ChannelCache {
             this.members.remove(channel);
         }
         this.members.put(channel, channelMembers);
+        plugin.transientPlayerCache.clearPlayerCache(channelMembers.values());
     }
 
 
@@ -104,6 +105,8 @@ public class ChannelCache {
 
 
     public void remove(String channel) {
+        HashMap<String, ChannelMember> channelMembers = this.members.get(channel);
+        plugin.transientPlayerCache.clearPlayerCache(channelMembers.values());
         this.channels.remove(channel);
         this.members.remove(channel);
         this.bulletins.remove(channel);
