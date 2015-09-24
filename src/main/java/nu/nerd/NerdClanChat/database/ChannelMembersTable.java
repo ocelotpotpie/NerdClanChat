@@ -70,4 +70,9 @@ public class ChannelMembersTable {
     }
 
 
+    public void update(ChannelMember channelMember) {
+        plugin.getDatabase().update(channelMember);
+    }
+
+
 }

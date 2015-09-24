@@ -40,4 +40,9 @@ public class PlayerMetaTable {
     }
 
 
+    public void update(PlayerMeta playerMeta) {
+        plugin.getDatabase().update(playerMeta);
+    }
+
+
 }

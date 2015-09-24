@@ -373,10 +373,16 @@ public class ClanChatCommand implements CommandExecutor {
         } else {
             channel.setColor(color);
         }
-        plugin.channelsTable.save(channel);
-        plugin.channelCache.updateChannel(channelName, channel);
-        String msg = String.format("Channel %s changed to %s%s!", key.name().toLowerCase(), ChatColor.valueOf(color), color);
-        sender.sendMessage(ChatColor.BLUE + msg);
+
+        try {
+            plugin.channelsTable.update(channel);
+            plugin.channelCache.updateChannel(channelName, channel);
+            String msg = String.format("Channel %s changed to %s%s!", key.name().toLowerCase(), ChatColor.valueOf(color), color);
+            sender.sendMessage(ChatColor.BLUE + msg);
+        } catch (Exception ex) {
+            plugin.getLogger().warning(ex.toString());
+            sender.sendMessage(ChatColor.RED + "There was an error updating the channel color.");
+        }
 
     }
 
@@ -507,17 +513,17 @@ public class ClanChatCommand implements CommandExecutor {
             ChannelMember oldOwnerMember = members.get(channel.getOwner());
             oldOwnerMember.setManager(true);
             members.put(channel.getOwner(), oldOwnerMember);
-            plugin.channelMembersTable.save(oldOwnerMember);
+            plugin.channelMembersTable.update(oldOwnerMember);
 
             // Change the channel owner
             channel.setOwner(newOwnerMeta.getUUID());
-            plugin.channelsTable.save(channel);
+            plugin.channelsTable.update(channel);
 
             // Ensure the new owner is a manager, for consistency
             ChannelMember newOwnerMember = members.get(newOwnerMeta.getUUID());
             newOwnerMember.setManager(true);
             members.put(newOwnerMeta.getUUID(), newOwnerMember);
-            plugin.channelMembersTable.save(newOwnerMember);
+            plugin.channelMembersTable.update(newOwnerMember);
 
             // Update cache
             plugin.channelCache.updateChannel(channelName, channel);
@@ -555,13 +561,18 @@ public class ClanChatCommand implements CommandExecutor {
             return;
         }
 
-        ChannelMember cm = members.get(managerMeta.getUUID());
-        cm.setManager(true);
-        members.put(cm.getUUID(), cm);
-        plugin.channelMembersTable.save(cm);
-        plugin.channelCache.updateChannelMembers(channelName, members);
-
-        sender.sendMessage(ChatColor.BLUE + String.format("%s added as a manager!", playerName));
+        try {
+            ChannelMember cm = members.get(managerMeta.getUUID());
+            cm.setManager(true);
+            members.put(cm.getUUID(), cm);
+            plugin.channelMembersTable.update(cm);
+            plugin.channelCache.updateChannelMembers(channelName, members);
+            sender.sendMessage(ChatColor.BLUE + String.format("%s added as a manager!", playerName));
+        } catch (Exception ex) {
+            sender.sendMessage(ChatColor.RED + "There was an error updating the manager status.");
+            plugin.getLogger().warning(ex.toString());
+            return;
+        }
 
         Player player = plugin.getServer().getPlayer(UUID.fromString(managerMeta.getUUID()));
         if (player != null) {
@@ -587,13 +598,17 @@ public class ClanChatCommand implements CommandExecutor {
             return;
         }
 
-        ChannelMember cm = members.get(managerMeta.getUUID());
-        cm.setManager(false);
-        members.put(cm.getUUID(), cm);
-        plugin.channelMembersTable.save(cm);
-        plugin.channelCache.updateChannelMembers(channelName, members);
-
-        sender.sendMessage(ChatColor.BLUE + String.format("%s removed as a manager from %s", playerName, channelName));
+        try {
+            ChannelMember cm = members.get(managerMeta.getUUID());
+            cm.setManager(false);
+            members.put(cm.getUUID(), cm);
+            plugin.channelMembersTable.update(cm);
+            plugin.channelCache.updateChannelMembers(channelName, members);
+            sender.sendMessage(ChatColor.BLUE + String.format("%s removed as a manager from %s", playerName, channelName));
+        } catch (Exception ex) {
+            sender.sendMessage(ChatColor.RED + "There was an error updating the manager status.");
+            plugin.getLogger().warning(ex.toString());
+        }
 
     }
 
@@ -940,7 +955,7 @@ public class ClanChatCommand implements CommandExecutor {
         try {
             member.setSubscribed(true);
             members.put(UUID, member);
-            plugin.channelMembersTable.save(member);
+            plugin.channelMembersTable.update(member);
             plugin.channelCache.updateChannelMembers(channelName, members);
             sender.sendMessage(ChatColor.BLUE + String.format("You are now subscribed to bulletins made in %s", channelName));
         } catch (Exception ex) {
@@ -968,7 +983,7 @@ public class ClanChatCommand implements CommandExecutor {
             ChannelMember member = members.get(UUID);
             member.setSubscribed(false);
             members.put(UUID, member);
-            plugin.channelMembersTable.save(member);
+            plugin.channelMembersTable.update(member);
             plugin.channelCache.updateChannelMembers(channelName, members);
             sender.sendMessage(ChatColor.BLUE + String.format("You are now unsubscribed from bulletins made in %s", channelName));
         } catch (Exception ex) {
@@ -980,8 +995,6 @@ public class ClanChatCommand implements CommandExecutor {
 
 
     private void listSubscriptions(CommandSender sender) {
-
-        //todo: fix cache desync (see comment in TransientPlayerCache). Whole cache needs work.
 
         if (!(sender instanceof Player)) return;
 
@@ -1054,7 +1067,7 @@ public class ClanChatCommand implements CommandExecutor {
         }
 
         try {
-            plugin.channelsTable.save(channel);
+            plugin.channelsTable.update(channel);
             plugin.channelCache.updateChannel(channelName, channel);
             sender.sendMessage(ChatColor.BLUE + String.format("Flag %s has been set to %s for %s", flagKey, flagValue, channelName));
         } catch (Exception ex) {

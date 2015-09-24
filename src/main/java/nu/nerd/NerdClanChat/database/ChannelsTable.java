@@ -56,4 +56,9 @@ public class ChannelsTable {
     }
 
 
+    public void update(Channel channel) {
+        plugin.getDatabase().update(channel);
+    }
+
+
 }
