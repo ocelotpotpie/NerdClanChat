@@ -2,7 +2,6 @@
  * This is a transient cache for miscellaneous player data, which is not persisted.
  * Mostly it's to prevent repetitive database queries if someone spams a command that reads
  * a data set that isn't typically in the other caches. (e.g. /cb and its channel list.)
- * The cache is cleared on a timer during PlayerMetaPersistTask.
  */
 
 package nu.nerd.NerdClanChat.caching;
