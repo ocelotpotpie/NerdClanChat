@@ -49,7 +49,7 @@ public class PluginListener implements Listener {
         plugin.playerMetaCache.updatePlayerMeta(UUID, meta);
 
         if (isNewPlayer) {
-            plugin.playerMetaTable.save(meta);
+            plugin.playerMetaTable.update(meta);
             plugin.playerMetaCache.setMetaPersisted(UUID, true);
         }
 

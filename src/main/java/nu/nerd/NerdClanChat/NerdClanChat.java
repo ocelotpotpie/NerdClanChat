@@ -11,7 +11,6 @@ import nu.nerd.NerdClanChat.database.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.persistence.PersistenceException;
-import java.io.File;
 import java.util.ArrayList;
 
 
@@ -76,9 +75,9 @@ public final class NerdClanChat extends JavaPlugin {
     @Override
     public void onDisable() {
         this.playerMetaPersistTask.cancel();
-        getLogger().info("Writing player meta to persistence database...");
+        this.logDebug("Writing player meta to persistence database...");
         this.playerMetaCache.persistCache();
-        getLogger().info("Done.");
+        this.logDebug("Done.");
     }
 
 
@@ -103,6 +102,13 @@ public final class NerdClanChat extends JavaPlugin {
         list.add(Bulletin.class);
         list.add(Invite.class);
         return list;
+    }
+
+
+    public void logDebug(String msg) {
+        if (config.DEBUG) {
+            getLogger().info(msg);
+        }
     }
 
 
