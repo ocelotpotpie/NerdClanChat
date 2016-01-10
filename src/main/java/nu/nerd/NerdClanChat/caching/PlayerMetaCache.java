@@ -9,21 +9,22 @@ package nu.nerd.NerdClanChat.caching;
 import nu.nerd.NerdClanChat.NerdClanChat;
 import nu.nerd.NerdClanChat.database.PlayerMeta;
 
-import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerMetaCache {
 
 
     public NerdClanChat plugin;
-    private HashMap<String, PlayerMeta> playerMeta;
-    private HashMap<String, Boolean> persisted;
+    private ConcurrentHashMap<String, PlayerMeta> playerMeta;
+    private ConcurrentHashMap<String, Boolean> persisted;
 
 
     public PlayerMetaCache(NerdClanChat plugin) {
         this.plugin = plugin;
-        this.playerMeta = new HashMap<String, PlayerMeta>();
-        this.persisted = new HashMap<String, Boolean>();
+        this.playerMeta = new ConcurrentHashMap<String, PlayerMeta>();
+        this.persisted = new ConcurrentHashMap<String, Boolean>();
     }
 
 
@@ -91,11 +92,13 @@ public class PlayerMetaCache {
     public void persistCache() {
         plugin.getDatabase().beginTransaction();
         try {
-            for (Map.Entry<String, Boolean> p : this.persisted.entrySet()) {
+            Iterator<Map.Entry<String, Boolean>> iterator = this.persisted.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, Boolean> p = iterator.next();
                 if (!p.getValue()) {
                     PlayerMeta meta = this.getPlayerMeta(p.getKey());
                     plugin.getDatabase().save(meta);
-                    this.setMetaPersisted(p.getKey(), true);
+                    p.setValue(true);
                 }
             }
             plugin.getDatabase().commitTransaction();
