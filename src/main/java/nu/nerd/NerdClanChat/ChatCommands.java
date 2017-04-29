@@ -365,7 +365,8 @@ public class ChatCommands implements CommandExecutor {
 
             if (!members.containsKey(UUID)) {
                 ChannelMember owner = members.get(channel.getOwner());
-                sender.sendMessage(ChatColor.RED + String.format("You are not a member of %s. Please speak to %s to join", channelName, owner.getName()));
+                String subtext = (!channel.isPub()) ? String.format("Please speak to %s to join.", owner.getName()) : String.format("Join with /clanchat join %s", channelName);
+                sender.sendMessage(ChatColor.RED + String.format("You are not a member of %s. %s", channelName, subtext));
                 return;
             }
 
