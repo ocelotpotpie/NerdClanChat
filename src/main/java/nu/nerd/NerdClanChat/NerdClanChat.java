@@ -6,6 +6,9 @@
 
 package nu.nerd.NerdClanChat;
 
+import com.avaje.ebean.EbeanServer;
+import nu.nerd.BukkitEbean.EbeanBuilder;
+import nu.nerd.BukkitEbean.EbeanHelper;
 import nu.nerd.NerdClanChat.caching.*;
 import nu.nerd.NerdClanChat.database.*;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -16,6 +19,8 @@ import java.util.ArrayList;
 
 public final class NerdClanChat extends JavaPlugin {
 
+
+    private EbeanServer db;
 
     public ChannelsTable channelsTable;
     public ChannelMembersTable channelMembersTable;
@@ -82,18 +87,23 @@ public final class NerdClanChat extends JavaPlugin {
 
 
     public boolean setUpDatabase() {
+        db = new EbeanBuilder(this).setClasses(getDatabaseClasses()).build();
         try {
             getDatabase().find(Channel.class).findRowCount();
         } catch (PersistenceException ex) {
             getLogger().info("Initializing database.");
-            installDDL();
+            EbeanHelper.installDDL(db);
             return true;
         }
         return false;
     }
 
 
-    @Override
+    public EbeanServer getDatabase() {
+        return db;
+    }
+
+
     public ArrayList<Class<?>> getDatabaseClasses() {
         ArrayList<Class<?>> list = new ArrayList<Class<?>>();
         list.add(Channel.class);
