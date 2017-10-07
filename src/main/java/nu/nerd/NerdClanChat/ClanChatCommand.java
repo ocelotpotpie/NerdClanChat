@@ -726,10 +726,9 @@ public class ClanChatCommand implements CommandExecutor {
                 if (m.isManager()) managers.add(m.getName());
             }
             sender.sendMessage(ChatColor.RED + "You can't join a non-public channel without an invite. Please speak with a channel owner or manager to join.");
-            sender.sendMessage(String.format("%sOwner: %s%s", ChatColor.GOLD, ChatColor.GRAY, channel.getOwner()));
-            sender.sendMessage(String.format("%sManagers: %s", ChatColor.GOLD, NCCUtil.formatList(managers, ChatColor.GRAY, ChatColor.WHITE)));
+            sender.sendMessage(String.format("%sOwner: %s%s", ChatColor.GOLD, ChatColor.GRAY, owner.getName()));
             if (!channel.isSecret()) {
-                sender.sendMessage(String.format("%sAdditional channel managers ", ChatColor.GRAY));
+                sender.sendMessage(String.format("%sManagers: %s", ChatColor.GOLD, NCCUtil.formatList(managers, ChatColor.GRAY, ChatColor.WHITE)));
             }
             return;
         }
