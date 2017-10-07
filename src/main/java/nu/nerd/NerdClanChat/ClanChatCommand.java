@@ -624,8 +624,9 @@ public class ClanChatCommand implements CommandExecutor {
 
     private void listChannelManagers(CommandSender sender, String channelName) {
 
-        if (!this.senderIsOwner(sender, channelName, true)) {
-            sender.sendMessage(ChatColor.RED + "Only channel owners can do that");
+        Channel channel = plugin.channelCache.getChannel(channelName.toLowerCase());
+        if (!this.senderIsMember(sender, channelName) && channel.isSecret()) {
+            sender.sendMessage(ChatColor.RED + "This channel is secret. You must be a member of the channel to see who is in the channel");
             return;
         }
 
@@ -720,7 +721,16 @@ public class ClanChatCommand implements CommandExecutor {
 
         if (!channel.isPub() && !plugin.invitesTable.alreadyInvited(UUID, channelName)) {
             ChannelMember owner = members.get(channel.getOwner());
-            sender.sendMessage(ChatColor.RED + String.format("You can't join a non-public channel without an invite. Please speak with %s about joining", owner.getName()));
+            List<String> managers = new ArrayList<String>();
+            for (ChannelMember m : members.values()) {
+                if (m.isManager()) managers.add(m.getName());
+            }
+            sender.sendMessage(ChatColor.RED + "You can't join a non-public channel without an invite. Please speak with a channel owner or manager to join.");
+            sender.sendMessage(String.format("%sOwner: %s%s", ChatColor.GOLD, ChatColor.GRAY, channel.getOwner()));
+            sender.sendMessage(String.format("%sManagers: %s", ChatColor.GOLD, NCCUtil.formatList(managers, ChatColor.GRAY, ChatColor.WHITE)));
+            if (!channel.isSecret()) {
+                sender.sendMessage(String.format("%sAdditional channel managers ", ChatColor.GRAY));
+            }
             return;
         }
 
@@ -1159,7 +1169,7 @@ public class ClanChatCommand implements CommandExecutor {
         sender.sendMessage(ChatColor.BLUE + "/clanchat changeowner <channel> <player>" + ChatColor.WHITE + " - Changes the owner on the given channel. Only the owner can set this. " + ChatColor.RED + "Careful! This can't be undone.");
         sender.sendMessage(ChatColor.BLUE + "/clanchat addmanager <channel> <player>" + ChatColor.WHITE + " - Adds a manager to the channel. You must be the owner to run this.");
         sender.sendMessage(ChatColor.BLUE + "/clanchat removemanager <channel> <player>" + ChatColor.WHITE + " - Removes a manager from the channel. You must be the owner to run this.");
-        sender.sendMessage(ChatColor.BLUE + "/clanchat listmanagers <channel>" + ChatColor.WHITE + " - List all managers in the channel. You must be owner to run this.");
+        sender.sendMessage(ChatColor.BLUE + "/clanchat listmanagers <channel>" + ChatColor.WHITE + " - List all managers in the channel.");
         sender.sendMessage(ChatColor.BLUE + "/clanchat remove <channel> <player>" + ChatColor.WHITE + " - Removes a player from the channel. You must be a manager to do this.");
         sender.sendMessage(ChatColor.BLUE + "/clanchat leave <channel>" + ChatColor.WHITE + " - Leaves a channel that you're in.");
         sender.sendMessage(ChatColor.BLUE + "/clanchat list" + ChatColor.WHITE + " - Lists all the channels you are in.");
