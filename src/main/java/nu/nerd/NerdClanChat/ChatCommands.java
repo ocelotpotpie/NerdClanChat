@@ -6,8 +6,8 @@ import nu.nerd.NerdClanChat.database.ChannelMember;
 import nu.nerd.NerdClanChat.database.PlayerMeta;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 
-public class ChatCommands implements CommandExecutor {
+public class ChatCommands implements TabExecutor {
 
 
     private final NerdClanChat plugin;
@@ -29,6 +29,13 @@ public class ChatCommands implements CommandExecutor {
         this.plugin = plugin;
     }
 
+    /**
+     * Prevent server from autosuggesting player names.
+     */
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String s, String[] strings) {
+        return new ArrayList<>();
+    }
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
