@@ -1,28 +1,105 @@
 package nu.nerd.NerdClanChat;
 
-import nu.nerd.NerdClanChat.database.*;
+import nu.nerd.NerdClanChat.database.Bulletin;
+import nu.nerd.NerdClanChat.database.Channel;
+import nu.nerd.NerdClanChat.database.ChannelMember;
+import nu.nerd.NerdClanChat.database.Invite;
+import nu.nerd.NerdClanChat.database.PlayerMeta;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.UUID;
 
 
-public class ClanChatCommand implements CommandExecutor {
+public class ClanChatCommand implements TabExecutor {
 
 
     private final NerdClanChat plugin;
     private HashMap<String, String> confirmChannelDeletion;
     private enum ChannelColor { COLOR, TEXTCOLOR, ALERTCOLOR }
 
+    private static final LinkedHashSet<String> SUBCOMMANDS = new LinkedHashSet<>(Arrays.asList(
+        "addbulletin", "addmanager", "alertcolor", "changeowner", "channels", "color", "confirm",
+        "create", "delete", "flags", "invite", "join", "leave", "list", "listmanagers", "members",
+        "more", "public", "reloadconfig", "remove", "removebulletin", "removemanager", "subscribe",
+        "subscriptions", "textcolor", "uninvite", "unsubscribe"
+    ));
+
+    private static final LinkedHashSet<String> FLAGS = new LinkedHashSet<>(Arrays.asList(
+        "public", "secret"
+    ));
+
+    private static final LinkedHashSet<String> COLORS = new LinkedHashSet<>();
 
     public ClanChatCommand(NerdClanChat plugin) {
         this.plugin = plugin;
         this.confirmChannelDeletion = new HashMap<String, String>();
+        Arrays.stream(ChatColor.values())
+              .sorted(Comparator.comparing(ChatColor::name))
+              .map(ChatColor::name)
+              .forEachOrdered(COLORS::add);
+        COLORS.removeAll(Arrays.asList("STRIKETHROUGH", "BOLD", "ITALIC", "MAGIC", "RESET", "UNDERLINE"));
     }
 
+    @Override
+    public List<String> onTabComplete(CommandSender commandSender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+
+        if (args == null || args.length == 0) {
+
+            completions.addAll(SUBCOMMANDS);
+
+        } else if (args.length == 1) {
+
+            String arg = args[0];
+            if (arg.equals("")) {
+                completions.addAll(SUBCOMMANDS);
+            } else {
+                SUBCOMMANDS.stream()
+                           .filter(s -> s.startsWith(arg))
+                           .forEach(completions::add);
+            }
+
+        } else if (args.length == 3) {
+
+            String arg = args[0];
+            if (arg.equalsIgnoreCase("color") || arg.equalsIgnoreCase("textcolor") || arg.equalsIgnoreCase("alertcolor")) {
+
+                String color = args[2];
+                if (color.equals("")) {
+                    completions.addAll(COLORS);
+                } else {
+                    COLORS.stream()
+                          .filter(s -> s.startsWith(color))
+                          .forEach(completions::add);
+                }
+
+            } else if (arg.equalsIgnoreCase("flags")) {
+
+                String flag = args[2];
+                if (flag.equals("")) {
+                    completions.addAll(FLAGS);
+                } else {
+                    FLAGS.stream()
+                         .filter(s -> s.startsWith(flag))
+                         .forEach(completions::add);
+                }
+
+            }
+
+        }
+
+        return completions;
+    }
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
 
