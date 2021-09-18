@@ -3,6 +3,7 @@ main: nu.nerd.NerdClanChat.NerdClanChat
 description: A chat channel plugin
 version: ${project.version}
 database: true
+api-version: 1.17
 
 
 commands:
